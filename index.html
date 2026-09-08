@@ -23,7 +23,6 @@
             -webkit-tap-highlight-color: transparent !important;
         }
 
-        /* Убираем синюю обводку на всех элементах */
         input:focus,
         textarea:focus,
         button:focus,
@@ -35,14 +34,12 @@
             -webkit-tap-highlight-color: transparent !important;
         }
 
-        /* Убираем выделение текста */
         .note-card,
         button,
         .btn,
         .toggle-switch,
         .sidebar .menu-item,
         .bg-options .bg-btn,
-        .fullscreen-btn,
         .transfer-row {
             -webkit-user-select: none;
             user-select: none;
@@ -730,14 +727,15 @@
             color: rgba(0, 0, 0, 0.4);
         }
 
-        /* ---------- ВЕРХНЯЯ ПАНЕЛЬ ---------- */
+        /* ---------- ВЕРХНЯЯ ПАНЕЛЬ (УВЕЛИЧЕННАЯ) ---------- */
         .top-bar {
             position: relative;
             z-index: 10;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 18px 12px;
+            padding: 18px 20px 16px;
+            margin-top: 6px;
             background: transparent;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -745,6 +743,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
             flex-shrink: 0;
             transition: background 0.4s ease;
+            min-height: 64px;
         }
 
         body.light .top-bar {
@@ -757,7 +756,7 @@
             border: none;
             color: #fff;
             cursor: pointer;
-            padding: 4px 6px;
+            padding: 6px 8px;
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -769,16 +768,16 @@
 
         .top-bar .menu-btn span {
             display: block;
-            width: 26px;
-            height: 2px;
+            width: 28px;
+            height: 2.5px;
             background: currentColor;
-            border-radius: 2px;
+            border-radius: 3px;
         }
 
         .top-bar .title {
             color: #fff;
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 1.3rem;
+            font-weight: 600;
             letter-spacing: 0.5px;
             transition: color 0.4s ease;
         }
@@ -788,14 +787,14 @@
         }
 
         .top-bar .spacer {
-            width: 38px;
+            width: 44px;
         }
 
         /* ---------- ОСНОВНОЙ КОНТЕНТ ---------- */
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 14px 0px;
+            padding: 12px 14px 20px;
             position: relative;
             z-index: 5;
             scroll-behavior: smooth;
@@ -815,24 +814,7 @@
             background: rgba(0, 0, 0, 0.12);
         }
 
-        /* ---------- НИЖНИЙ БАМПЕР (для Telegram) ---------- */
-        .bottom-bumper {
-            height: 70px;
-            min-height: 70px;
-            flex-shrink: 0;
-            background: transparent;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            background: rgba(10, 10, 10, 0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            position: relative;
-            z-index: 5;
-        }
-
-        body.light .bottom-bumper {
-            background: rgba(245, 240, 235, 0.3);
-            border-top: 1px solid rgba(0, 0, 0, 0.04);
-        }
+        /* ---------- НЕТ НИЖНЕЙ ПОЛОСЫ ---------- */
 
         /* ---------- ПУСТОЕ СОСТОЯНИЕ ---------- */
         .empty-state {
@@ -1057,7 +1039,7 @@
         /* ---------- КНОПКА ПЛЮС ---------- */
         .fab {
             position: absolute;
-            bottom: 88px;
+            bottom: 28px;
             right: 18px;
             z-index: 20;
             width: 56px;
@@ -2282,7 +2264,7 @@
         /* ---------- АДАПТИВ ---------- */
         @media (max-width: 480px) {
             .content {
-                padding: 10px 12px 0px;
+                padding: 10px 12px 16px;
             }
             .notes-grid {
                 gap: 6px;
@@ -2296,7 +2278,7 @@
                 width: 50px;
                 height: 50px;
                 font-size: 1.8rem;
-                bottom: 82px;
+                bottom: 22px;
                 right: 14px;
             }
             .modal-content {
@@ -2312,9 +2294,13 @@
                 font-size: 0.75rem;
                 padding: 8px 16px;
             }
-            .bottom-bumper {
-                height: 60px;
+            .top-bar {
+                padding: 16px 16px 14px;
                 min-height: 60px;
+                margin-top: 4px;
+            }
+            .top-bar .title {
+                font-size: 1.1rem;
             }
             .lock-screen .lock-title {
                 font-size: 1.2rem;
@@ -2428,6 +2414,7 @@
             </div>
         </div>
 
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ — УВЕЛИЧЕННАЯ И ОПУЩЕННАЯ -->
         <div class="top-bar">
             <button class="menu-btn" id="menuBtn">
                 <span></span><span></span><span></span>
@@ -2445,8 +2432,7 @@
             <div class="notes-grid" id="notesContainer"></div>
         </div>
 
-        <!-- НИЖНИЙ БАМПЕР ДЛЯ TELEGRAM -->
-        <div class="bottom-bumper"></div>
+        <!-- НЕТ НИЖНЕЙ ПОЛОСЫ -->
 
         <button class="fab" id="fabBtn">+</button>
 
@@ -2953,7 +2939,7 @@
             // ---------- ЗАГРУЗКА ----------
             function loadData() {
                 try {
-                    const saved = localStorage.getItem('notes_data_v13');
+                    const saved = localStorage.getItem('notes_data_v14');
                     if (saved) {
                         const data = JSON.parse(saved);
                         notes = data.notes || [];
@@ -2973,11 +2959,8 @@
                 renderNotes();
                 loadPassword();
 
-                // Проверяем, что приложение открыто в Telegram
                 if (window.Telegram && window.Telegram.WebApp) {
-                    // Уведомляем Telegram, что приложение готово
                     window.Telegram.WebApp.ready();
-                    // Расширяем на весь экран
                     window.Telegram.WebApp.expand();
                 }
             }
@@ -2990,7 +2973,7 @@
                         bg: currentBg,
                         customBg: customBg
                     };
-                    localStorage.setItem('notes_data_v13', JSON.stringify(data));
+                    localStorage.setItem('notes_data_v14', JSON.stringify(data));
                     console.log('💾 Сохранено заметок:', notes.length);
                 } catch (e) {
                     console.warn('Ошибка сохранения:', e);
@@ -3052,8 +3035,18 @@
                     card.className = 'note-card';
                     card.dataset.index = realIndex;
 
+                    // Обработка клика для открытия заметки
+                    card.addEventListener('click', function(e) {
+                        // Если клик по кнопке удаления — не открываем
+                        if (e.target.closest('.card-actions')) return;
+                        if (isLocked) return;
+                        openViewModal(realIndex);
+                    });
+
+                    // Долгое нажатие для удаления
                     card.addEventListener('pointerdown', function(e) {
                         if (isLocked) return;
+                        if (e.target.closest('.card-actions')) return;
                         longPressTimer = setTimeout(() => {
                             const actions = this.querySelector('.card-actions');
                             if (actions) {
@@ -3068,10 +3061,6 @@
 
                     card.addEventListener('pointerup', function(e) {
                         clearTimeout(longPressTimer);
-                        const actions = this.querySelector('.card-actions');
-                        if (actions && !actions.classList.contains('show')) {
-                            if (!isLocked) openViewModal(realIndex);
-                        }
                     });
 
                     card.addEventListener('pointerleave', function() {
