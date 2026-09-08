@@ -727,6 +727,126 @@
             color: rgba(0, 0, 0, 0.4);
         }
 
+        /* ---------- ПОДДЕРЖАТЬ ПРОЕКТ ---------- */
+        .support-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 120;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .support-overlay.active {
+            display: flex;
+        }
+
+        .support-window {
+            background: rgba(20, 20, 22, 0.92);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border-radius: 24px;
+            padding: 32px 28px 28px;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        body.light .support-window {
+            background: rgba(245, 240, 235, 0.92);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .support-window .support-icon {
+            font-size: 3.2rem;
+            margin-bottom: 10px;
+        }
+
+        .support-window .support-title {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        body.light .support-window .support-title {
+            color: #1a1a1a;
+        }
+
+        .support-window .support-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 18px;
+        }
+
+        body.light .support-window .support-text {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .support-window .support-text .highlight {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        body.light .support-window .support-text .highlight {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .support-window .support-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .support-window .support-actions button {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.25s;
+            font-family: inherit;
+        }
+
+        .support-window .support-actions .btn-support-donate {
+            background: #ff8c00;
+            color: #fff;
+            box-shadow: 0 4px 24px rgba(255, 140, 0, 0.3);
+        }
+
+        .support-window .support-actions .btn-support-donate:hover {
+            background: #e67e00;
+            transform: scale(1.03);
+        }
+
+        .support-window .support-actions .btn-support-close {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        body.light .support-window .support-actions .btn-support-close {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .support-window .support-actions .btn-support-close:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        body.light .support-window .support-actions .btn-support-close:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
         /* ---------- ВЕРХНЯЯ ПАНЕЛЬ — ОПУЩЕНА В 1.5 РАЗА НИЖЕ ---------- */
         .top-bar {
             position: relative;
@@ -736,7 +856,6 @@
             justify-content: space-between;
             padding: 28px 20px 22px;
             margin-top: 54px;
-            /* было 36px — увеличен в 1.5 раза */
             background: transparent;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -2134,6 +2253,11 @@
         .sidebar .bg-options .bg-btn[data-bg="blue"] { background: #0d1b2a; }
         .sidebar .bg-options .bg-btn[data-bg="green"] { background: #0f1a12; }
         .sidebar .bg-options .bg-btn[data-bg="purple"] { background: #1a0f1f; }
+        .sidebar .bg-options .bg-btn[data-bg="wallpaper"] {
+            background-image: url('https://s336vla.storage.yandex.net/rdisk/9f3afa99762b65812cfe291648695d8ea165cede8f3c967f4912856c7d0a4e3c/6aa0a6bc/r6qhP4JaNl-rfJM9Z_wyioP5tjDUFVMeIMLoD6mhLjGOEKeG9o4wNwCL_YAID7nzhAJS-6PHS3fEdxro0HxlIA==?uid=2346789452&filename=generated_image_e06ab1549d8b11f19fddea615d81a76c~2.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg&owner_uid=2346789452&fsize=187314&hid=0087fc85fd648a4be409dbcaba31b13b&media_type=image&tknv=v3&is_direct_zip_experiment=1&etag=9481030bfc206ff08b277cbd41729f20&ts=65b01d82a2700&s=6d2b982d81d420190be9b72d5efaebaee3a1625240f787d79b053d6367709998&pb=U2FsdGVkX1-jaujI0I34J1Xm96b1BNkMLH1ygs8hfa26zkAePdC-F8xJGIhUuYoGFll-75EoLkXhCUjkIyOK6eoEGiKVrSHpZM1nSo-dKwU');
+            background-size: cover;
+            background-position: center;
+        }
 
         .sidebar .password-section {
             margin-top: 6px;
@@ -2245,6 +2369,44 @@
             color: rgba(0, 0, 0, 0.1);
         }
 
+        .sidebar .support-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 4px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        .sidebar .support-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        body.light .sidebar .support-row:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .sidebar .support-row span {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+
+        body.light .sidebar .support-row span {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .sidebar .support-row .arrow {
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 1rem;
+        }
+
+        body.light .sidebar .support-row .arrow {
+            color: rgba(0, 0, 0, 0.1);
+        }
+
         /* ---------- САЙДБАР ОВЕРЛЕЙ ---------- */
         .sidebar-overlay {
             position: absolute;
@@ -2316,6 +2478,9 @@
             }
             .password-dialog .dialog-box {
                 padding: 20px 16px;
+            }
+            .support-window {
+                padding: 24px 20px;
             }
         }
 
@@ -2409,6 +2574,22 @@
                 <div class="dialog-actions">
                     <button class="dialog-btn-confirm" id="dialogConfirmBtn">Подтвердить</button>
                     <button class="dialog-btn-cancel" id="dialogCancelBtn">Отмена</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ОКНО ПОДДЕРЖКИ -->
+        <div class="support-overlay" id="supportOverlay">
+            <div class="support-window">
+                <div class="support-icon">⭐</div>
+                <div class="support-title">Поддержать проект</div>
+                <div class="support-text">
+                    Вы можете подписаться на наш платный частный канал.<br><br>
+                    <span class="highlight">Пока мы не выкладываем там новости или другой контент</span> — просто поддержите нас звёздами, чтобы мы могли развивать приложение дальше! 🚀
+                </div>
+                <div class="support-actions">
+                    <button class="btn-support-donate" id="supportDonateBtn">⭐ Поддержать</button>
+                    <button class="btn-support-close" id="supportCloseBtn">Закрыть</button>
                 </div>
             </div>
         </div>
@@ -2572,6 +2753,7 @@
                 <button class="bg-btn" data-bg="blue"></button>
                 <button class="bg-btn" data-bg="green"></button>
                 <button class="bg-btn" data-bg="purple"></button>
+                <button class="bg-btn" data-bg="wallpaper"></button>
                 <button class="bg-btn custom-bg" data-bg="custom">+</button>
                 <input type="file" id="customBgInput" accept="image/*" style="display:none;">
             </div>
@@ -2599,6 +2781,16 @@
                     <span>📦 Перенос данных</span>
                     <span class="arrow">→</span>
                 </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="color:rgba(255,255,255,0.3); font-size:0.75rem; padding:0 14px 2px; letter-spacing:0.5px;">
+                Поддержка
+            </div>
+            <div class="support-row" id="supportRow">
+                <span>⭐ Поддержать проект</span>
+                <span class="arrow">→</span>
             </div>
 
             <div class="divider"></div>
@@ -2684,6 +2876,12 @@
             const transferInstructionsBtn = document.getElementById('transferInstructionsBtn');
             const transferInstructions = document.getElementById('transferInstructions');
             const transferCloseBtn = document.getElementById('transferCloseBtn');
+
+            // Support
+            const supportOverlay = document.getElementById('supportOverlay');
+            const supportRow = document.getElementById('supportRow');
+            const supportDonateBtn = document.getElementById('supportDonateBtn');
+            const supportCloseBtn = document.getElementById('supportCloseBtn');
 
             // Password dialog
             const passwordDialog = document.getElementById('passwordDialog');
@@ -2933,6 +3131,20 @@
                 input.click();
             }
 
+            // ---------- ПОДДЕРЖКА ----------
+            function showSupport() {
+                supportOverlay.classList.add('active');
+            }
+
+            function hideSupport() {
+                supportOverlay.classList.remove('active');
+            }
+
+            function openSupportChannel() {
+                window.open('https://t.me/+FE00yvzCU605M2Y6', '_blank');
+                hideSupport();
+            }
+
             // ---------- ЗАГРУЗКА ----------
             function loadData() {
                 try {
@@ -3006,6 +3218,9 @@
                 } else if (currentBg === 'custom' && customBg) {
                     appBg.classList.add('image-bg');
                     appBg.style.backgroundImage = `url(${customBg})`;
+                } else if (currentBg === 'wallpaper') {
+                    appBg.classList.add('image-bg');
+                    appBg.style.backgroundImage = `url('https://s336vla.storage.yandex.net/rdisk/9f3afa99762b65812cfe291648695d8ea165cede8f3c967f4912856c7d0a4e3c/6aa0a6bc/r6qhP4JaNl-rfJM9Z_wyioP5tjDUFVMeIMLoD6mhLjGOEKeG9o4wNwCL_YAID7nzhAJS-6PHS3fEdxro0HxlIA==?uid=2346789452&filename=generated_image_e06ab1549d8b11f19fddea615d81a76c~2.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg&owner_uid=2346789452&fsize=187314&hid=0087fc85fd648a4be409dbcaba31b13b&media_type=image&tknv=v3&is_direct_zip_experiment=1&etag=9481030bfc206ff08b277cbd41729f20&ts=65b01d82a2700&s=6d2b982d81d420190be9b72d5efaebaee3a1625240f787d79b053d6367709998&pb=U2FsdGVkX1-jaujI0I34J1Xm96b1BNkMLH1ygs8hfa26zkAePdC-F8xJGIhUuYoGFll-75EoLkXhCUjkIyOK6eoEGiKVrSHpZM1nSo-dKwU')`;
                 } else {
                     const bgMap = { 'dark': '#1a1a2e', 'blue': '#0d1b2a', 'green': '#0f1a12', 'purple': '#1a0f1f' };
                     appBg.style.background = bgMap[currentBg] || (currentTheme === 'dark' ? '#0a0a0a' : '#f5f0eb');
@@ -4107,6 +4322,14 @@
 
             clearAllBtn.addEventListener('click', clearAllNotes);
 
+            // Поддержка
+            supportRow.addEventListener('click', showSupport);
+            supportCloseBtn.addEventListener('click', hideSupport);
+            supportDonateBtn.addEventListener('click', openSupportChannel);
+            supportOverlay.addEventListener('click', (e) => {
+                if (e.target === supportOverlay) hideSupport();
+            });
+
             bgOptions.addEventListener('click', (e) => {
                 if (isLocked) return;
                 const btn = e.target.closest('.bg-btn');
@@ -4239,6 +4462,7 @@
                     if (isViewOpen) closeViewModal();
                     if (recoveryOverlay.classList.contains('active')) hideRecovery();
                     if (transferOverlay.classList.contains('active')) hideTransfer();
+                    if (supportOverlay.classList.contains('active')) hideSupport();
                     if (passwordDialog.classList.contains('active')) {
                         passwordDialog.classList.remove('active');
                         dialogPasswordInput.value = '';
