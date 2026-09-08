@@ -1,0 +1,4291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Заметки</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            transition: background 0.4s ease;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body.light {
+            background: #e8e4de;
+        }
+
+        .app {
+            max-width: 480px;
+            width: 100%;
+            height: 100vh;
+            max-height: 900px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            border-radius: 0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.4s ease, box-shadow 0.4s ease;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+        }
+
+        body.light .app {
+            background: #f5f0eb;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .app-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: #0a0a0a;
+            transition: background 0.5s ease;
+            pointer-events: none;
+        }
+
+        body.light .app-bg {
+            background: #f5f0eb;
+        }
+
+        .app-bg.image-bg {
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+        }
+
+        .lock-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            gap: 20px;
+            transition: opacity 0.5s ease;
+        }
+
+        .lock-screen.active {
+            display: flex;
+        }
+
+        .lock-screen .lock-icon {
+            font-size: 3.6rem;
+            margin-bottom: 4px;
+            opacity: 0.7;
+        }
+
+        .lock-screen .lock-title {
+            color: #fff;
+            font-size: 1.6rem;
+            font-weight: 300;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+        }
+
+        body.light .lock-screen {
+            background: rgba(245, 240, 235, 0.92);
+        }
+
+        body.light .lock-screen .lock-title {
+            color: #1a1a1a;
+        }
+
+        .lock-screen .lock-subtitle {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        body.light .lock-screen .lock-subtitle {
+            color: rgba(0, 0, 0, 0.2);
+        }
+
+        .lock-screen .lock-input-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .lock-screen .lock-input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e8e8e8;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            font-family: inherit;
+            letter-spacing: 6px;
+            transition: 0.3s;
+        }
+
+        body.light .lock-screen .lock-input {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+        }
+
+        .lock-screen .lock-input:focus {
+            border-color: #ff8c00;
+            box-shadow: 0 0 30px rgba(255, 140, 0, 0.05);
+        }
+
+        .lock-screen .lock-input::placeholder {
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        body.light .lock-screen .lock-input::placeholder {
+            color: rgba(0, 0, 0, 0.15);
+        }
+
+        .lock-screen .lock-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lock-screen .lock-btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.25s;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+        }
+
+        .lock-screen .lock-btn-unlock {
+            background: #ff8c00;
+            color: #fff;
+            box-shadow: 0 4px 24px rgba(255, 140, 0, 0.25);
+        }
+
+        .lock-screen .lock-btn-unlock:hover {
+            background: #e67e00;
+            transform: scale(1.02);
+            box-shadow: 0 6px 32px rgba(255, 140, 0, 0.35);
+        }
+
+        .lock-screen .lock-btn-unlock:active {
+            transform: scale(0.96);
+        }
+
+        .lock-screen .lock-btn-reset {
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.35);
+            font-weight: 400;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        body.light .lock-screen .lock-btn-reset {
+            background: rgba(0, 0, 0, 0.03);
+            color: rgba(0, 0, 0, 0.25);
+            border-color: rgba(0, 0, 0, 0.04);
+        }
+
+        .lock-screen .lock-btn-reset:hover {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border-color: rgba(231, 76, 60, 0.15);
+        }
+
+        .lock-screen .lock-error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            min-height: 24px;
+            text-align: center;
+        }
+
+        .recovery-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 110;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .recovery-overlay.active {
+            display: flex;
+        }
+
+        .recovery-window {
+            background: rgba(20, 20, 22, 0.92);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border-radius: 24px;
+            padding: 32px 28px 28px;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        body.light .recovery-window {
+            background: rgba(245, 240, 235, 0.92);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .recovery-window .recovery-icon {
+            font-size: 3.2rem;
+            color: #e74c3c;
+            margin-bottom: 12px;
+            font-weight: 300;
+        }
+
+        .recovery-window .recovery-title {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        body.light .recovery-window .recovery-title {
+            color: #1a1a1a;
+        }
+
+        .recovery-window .recovery-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        body.light .recovery-window .recovery-text {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .recovery-window .recovery-text strong {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+        }
+
+        body.light .recovery-window .recovery-text strong {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .recovery-window .recovery-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .recovery-window .recovery-actions button {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .recovery-window .recovery-actions .btn-recovery-danger {
+            background: #e74c3c;
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.2);
+        }
+
+        .recovery-window .recovery-actions .btn-recovery-danger:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+
+        .recovery-window .recovery-actions .btn-recovery-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .recovery-window .recovery-actions .btn-recovery-cancel {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .recovery-window .recovery-actions .btn-recovery-cancel:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        body.light .recovery-window .recovery-actions .btn-recovery-cancel:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        .transfer-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 115;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .transfer-overlay.active {
+            display: flex;
+        }
+
+        .transfer-window {
+            background: rgba(20, 20, 22, 0.92);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border-radius: 24px;
+            padding: 28px 24px 24px;
+            max-width: 420px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        body.light .transfer-window {
+            background: rgba(245, 240, 235, 0.92);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .transfer-window .transfer-icon {
+            font-size: 2.8rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .transfer-window .transfer-title {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        body.light .transfer-window .transfer-title {
+            color: #1a1a1a;
+        }
+
+        .transfer-window .transfer-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        body.light .transfer-window .transfer-text {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .transfer-window .transfer-text .highlight {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+
+        body.light .transfer-window .transfer-text .highlight {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .transfer-window .transfer-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .transfer-window .transfer-actions button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .transfer-window .transfer-actions .btn-transfer-download {
+            background: #ff8c00;
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 140, 0, 0.2);
+        }
+
+        .transfer-window .transfer-actions .btn-transfer-download:hover {
+            background: #e67e00;
+            transform: scale(1.01);
+        }
+
+        .transfer-window .transfer-actions .btn-transfer-upload {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        body.light .transfer-window .transfer-actions .btn-transfer-upload {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .transfer-window .transfer-actions .btn-transfer-upload:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+
+        .transfer-window .transfer-actions .btn-transfer-instructions {
+            background: none;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.85rem;
+            text-decoration: underline;
+            padding: 6px;
+        }
+
+        body.light .transfer-window .transfer-actions .btn-transfer-instructions {
+            color: rgba(0, 0, 0, 0.25);
+        }
+
+        .transfer-window .transfer-actions .btn-transfer-instructions:hover {
+            color: #ff8c00;
+        }
+
+        .transfer-window .transfer-actions .btn-transfer-close {
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.85rem;
+            padding: 8px;
+            margin-top: 4px;
+        }
+
+        body.light .transfer-window .transfer-actions .btn-transfer-close {
+            background: rgba(0, 0, 0, 0.02);
+            color: rgba(0, 0, 0, 0.25);
+        }
+
+        .transfer-window .transfer-actions .btn-transfer-close:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        body.light .transfer-window .transfer-actions .btn-transfer-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .transfer-window .transfer-instructions {
+            display: none;
+            margin-top: 14px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        body.light .transfer-window .transfer-instructions {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .transfer-window .transfer-instructions.active {
+            display: block;
+        }
+
+        .transfer-window .transfer-instructions p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            line-height: 1.6;
+            margin-bottom: 6px;
+        }
+
+        body.light .transfer-window .transfer-instructions p {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .transfer-window .transfer-instructions .step {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .transfer-window .transfer-instructions .step .num {
+            color: #ff8c00;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 24px;
+        }
+
+        .transfer-window .transfer-instructions .step .text {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        body.light .transfer-window .transfer-instructions .step .text {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .transfer-window .transfer-instructions .file-note {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+            font-style: italic;
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        body.light .transfer-window .transfer-instructions .file-note {
+            color: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .password-dialog {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .password-dialog.active {
+            display: flex;
+        }
+
+        .password-dialog .dialog-box {
+            background: rgba(20, 20, 22, 0.92);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border-radius: 24px;
+            padding: 28px 24px;
+            max-width: 360px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+        }
+
+        body.light .password-dialog .dialog-box {
+            background: rgba(245, 240, 235, 0.92);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .password-dialog .dialog-box .dialog-title {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        body.light .password-dialog .dialog-box .dialog-title {
+            color: #1a1a1a;
+        }
+
+        .password-dialog .dialog-box .dialog-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e8e8e8;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            font-family: inherit;
+            letter-spacing: 4px;
+            margin-bottom: 12px;
+        }
+
+        body.light .password-dialog .dialog-box .dialog-input {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+        }
+
+        .password-dialog .dialog-box .dialog-input:focus {
+            border-color: #ff8c00;
+        }
+
+        .password-dialog .dialog-box .dialog-error {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            min-height: 20px;
+            margin-bottom: 10px;
+        }
+
+        .password-dialog .dialog-box .dialog-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .password-dialog .dialog-box .dialog-actions button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .password-dialog .dialog-box .dialog-actions .dialog-btn-confirm {
+            background: #ff8c00;
+            color: #fff;
+        }
+
+        .password-dialog .dialog-box .dialog-actions .dialog-btn-confirm:hover {
+            background: #e67e00;
+        }
+
+        .password-dialog .dialog-box .dialog-actions .dialog-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .password-dialog .dialog-box .dialog-actions .dialog-btn-cancel {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .top-bar {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px 12px;
+            background: transparent;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(10, 10, 10, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
+            transition: background 0.4s ease;
+        }
+
+        body.light .top-bar {
+            background: rgba(245, 240, 235, 0.7);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .top-bar .menu-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        body.light .top-bar .menu-btn {
+            color: #1a1a1a;
+        }
+
+        .top-bar .menu-btn span {
+            display: block;
+            width: 26px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 2px;
+        }
+
+        .top-bar .title {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: color 0.4s ease;
+        }
+
+        body.light .top-bar .title {
+            color: #1a1a1a;
+        }
+
+        .top-bar .spacer {
+            width: 38px;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 14px 90px;
+            position: relative;
+            z-index: 5;
+            scroll-behavior: smooth;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 3px;
+        }
+        .content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+        }
+        body.light .content::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 220px;
+            color: rgba(255, 255, 255, 0.2);
+            text-align: center;
+            padding: 20px;
+        }
+
+        body.light .empty-state {
+            color: rgba(0, 0, 0, 0.2);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 14px;
+            opacity: 0.4;
+            font-weight: 300;
+        }
+
+        .empty-state h2 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        body.light .empty-state h2 {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .empty-state p {
+            font-size: 0.85rem;
+            opacity: 0.5;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .note-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 12px;
+            padding: 10px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+            animation: fadeUp 0.3s ease;
+            cursor: pointer;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 80px;
+            max-height: 120px;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .note-card .card-actions {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 5;
+        }
+
+        .note-card .card-actions.show {
+            opacity: 1;
+        }
+
+        .note-card .card-actions button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        body.light .note-card .card-actions button {
+            background: rgba(255, 255, 255, 0.6);
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .note-card .card-actions button:hover {
+            background: rgba(231, 76, 60, 0.4);
+            color: #fff;
+        }
+
+        .note-card .card-actions .btn-delete:hover {
+            background: rgba(231, 76, 60, 0.5);
+            color: #e74c3c;
+        }
+
+        body.light .note-card {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .note-card .note-title {
+            color: #e8e8e8;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+
+        body.light .note-card .note-title {
+            color: #1a1a1a;
+        }
+
+        .note-card .note-preview {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.65rem;
+            line-height: 1.3;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            flex: 1;
+        }
+
+        body.light .note-card .note-preview {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .note-card .note-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 0.5rem;
+            color: rgba(255, 255, 255, 0.15);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 4px;
+            flex-shrink: 0;
+        }
+
+        body.light .note-card .note-meta {
+            color: rgba(0, 0, 0, 0.15);
+            border-top: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .note-card .note-meta .delete-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 0 4px;
+            border-radius: 4px;
+            transition: 0.2s;
+            z-index: 2;
+            position: relative;
+        }
+
+        body.light .note-card .note-meta .delete-btn {
+            color: rgba(0, 0, 0, 0.2);
+        }
+
+        .note-card .note-meta .delete-btn:hover {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .note-card .note-tag {
+            display: inline-block;
+            font-size: 0.45rem;
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: rgba(255, 140, 0, 0.12);
+            color: #ff8c00;
+        }
+
+        .fab {
+            position: absolute;
+            bottom: 28px;
+            right: 18px;
+            z-index: 20;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #ff8c00;
+            border: none;
+            color: #fff;
+            font-size: 2.2rem;
+            font-weight: 300;
+            cursor: pointer;
+            box-shadow: 0 8px 35px rgba(255, 140, 0, 0.4);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.light .fab {
+            box-shadow: 8px 8px 30px rgba(255, 140, 0, 0.3);
+        }
+
+        .fab:hover {
+            transform: scale(1.05);
+        }
+
+        .fab:active {
+            transform: scale(0.92);
+        }
+
+        .modal-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 30;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        body.light .modal-overlay {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(20, 20, 22, 0.9);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border-radius: 24px;
+            padding: 20px 18px 24px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        body.light .modal-content {
+            background: rgba(245, 240, 235, 0.92);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h3 {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        body.light .modal-content h3 {
+            color: #1a1a1a;
+        }
+
+        .modal-content input[type="text"] {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            outline: none;
+            margin-bottom: 10px;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        body.light .modal-content input[type="text"] {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+        }
+
+        .modal-content input[type="text"]:focus {
+            border-color: #ff8c00;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            min-height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: #e8e8e8;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        body.light .modal-content textarea {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+        }
+
+        .modal-content textarea:focus {
+            border-color: #ff8c00;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 6px 0 10px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        body.light .toggle-switch {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .toggle-switch span {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+
+        body.light .toggle-switch span {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .toggle-switch .toggle-track {
+            width: 40px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+
+        body.light .toggle-switch .toggle-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch .toggle-track .toggle-thumb {
+            width: 18px;
+            height: 18px;
+            background: #555;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: 0.3s;
+        }
+
+        body.light .toggle-switch .toggle-track .toggle-thumb {
+            background: #999;
+        }
+
+        .toggle-switch .toggle-track.active .toggle-thumb {
+            left: 19px;
+            background: #ff8c00;
+        }
+
+        .marker-section {
+            margin: 8px 0 10px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            display: none;
+        }
+
+        body.light .marker-section {
+            border-color: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .marker-section.active {
+            display: block;
+        }
+
+        .marker-section .marker-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+        }
+
+        body.light .marker-section .marker-tools {
+            background: rgba(0, 0, 0, 0.04);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .marker-section .marker-tools button {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        body.light .marker-section .marker-tools button {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .marker-section .marker-tools button:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+
+        .marker-section .marker-tools button.active {
+            background: rgba(255, 140, 0, 0.15);
+            color: #ff8c00;
+        }
+
+        .marker-section .marker-tools .color-picker {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .marker-section .marker-tools .color-picker input[type="color"] {
+            width: 28px;
+            height: 28px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+
+        body.light .marker-section .marker-tools .color-picker input[type="color"] {
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .marker-section .marker-canvas-wrap {
+            position: relative;
+            padding: 6px;
+        }
+
+        .marker-section .marker-canvas-wrap canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            touch-action: none;
+            cursor: crosshair;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.1);
+            min-height: 160px;
+        }
+
+        body.light .marker-section .marker-canvas-wrap canvas {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .marker-section .marker-canvas-wrap.fullscreen-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .marker-section .marker-canvas-wrap.fullscreen-canvas canvas {
+            width: 90vw;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            max-height: 80vh;
+            min-height: 300px;
+        }
+
+        .marker-section .marker-canvas-wrap.fullscreen-canvas .fullscreen-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .marker-section .marker-canvas-wrap.fullscreen-canvas .fullscreen-controls button {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        .marker-section .marker-canvas-wrap.fullscreen-canvas .fullscreen-controls button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .marker-section .marker-actions {
+            display: flex;
+            gap: 6px;
+            padding: 6px 10px;
+            flex-wrap: wrap;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        body.light .marker-section .marker-actions {
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .marker-section .marker-actions button {
+            padding: 4px 14px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        body.light .marker-section .marker-actions button {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .marker-section .marker-actions button:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+
+        .marker-section .marker-actions .recognize-status {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+            padding: 4px 10px;
+        }
+
+        body.light .marker-section .marker-actions .recognize-status {
+            color: rgba(0, 0, 0, 0.25);
+        }
+
+        .photo-section {
+            margin: 8px 0 10px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            display: none;
+        }
+
+        body.light .photo-section {
+            border-color: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .photo-section.active {
+            display: block;
+        }
+
+        .photo-section .photo-upload-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .photo-section .photo-upload-wrap .photo-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .photo-section .photo-upload-wrap label {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 8px 16px;
+            color: rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        body.light .photo-section .photo-upload-wrap label {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .photo-section .photo-upload-wrap label:hover {
+            border-color: #ff8c00;
+            color: #ff8c00;
+        }
+
+        .photo-section .photo-upload-wrap input[type="file"] {
+            display: none;
+        }
+
+        .photo-section .photo-upload-wrap .photo-url-input {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e8e8e8;
+            font-size: 0.85rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        body.light .photo-section .photo-upload-wrap .photo-url-input {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+        }
+
+        .photo-section .photo-upload-wrap .photo-url-input:focus {
+            border-color: #ff8c00;
+        }
+
+        .photo-section .photo-upload-wrap .photo-load-btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 140, 0, 0.15);
+            color: #ff8c00;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .photo-section .photo-upload-wrap .photo-load-btn:hover {
+            background: rgba(255, 140, 0, 0.25);
+        }
+
+        .photo-section .photo-preview {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 10px;
+            margin-top: 8px;
+            object-fit: cover;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .chart-section {
+            margin: 10px 0;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            display: none;
+        }
+
+        body.light .chart-section {
+            border-color: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .chart-section.active {
+            display: block;
+        }
+
+        .chart-section .chart-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .chart-section .chart-tabs button {
+            padding: 4px 14px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        body.light .chart-section .chart-tabs button {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .chart-section .chart-tabs button:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+
+        .chart-section .chart-tabs button.active {
+            background: rgba(255, 140, 0, 0.15);
+            color: #ff8c00;
+        }
+
+        .chart-section .chart-title {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+
+        body.light .chart-section .chart-title {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .chart-section .chart-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+            align-items: center;
+        }
+
+        .chart-section .chart-row input {
+            flex: 1;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e8e8e8;
+            font-size: 0.8rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        body.light .chart-section .chart-row input {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+        }
+
+        .chart-section .chart-row input:focus {
+            border-color: #ff8c00;
+        }
+
+        .chart-section .chart-row input[type="number"] {
+            width: 60px;
+            flex: none;
+        }
+
+        .chart-section .chart-row input[type="color"] {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            background: none;
+            flex: none;
+        }
+
+        body.light .chart-section .chart-row input[type="color"] {
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-section .chart-row button {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        body.light .chart-section .chart-row button {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .chart-section .chart-row button:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+
+        .chart-section .chart-canvas-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .chart-section .chart-canvas-wrap canvas {
+            max-width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .chart-section .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        .chart-section .chart-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        body.light .chart-section .chart-legend .legend-item {
+            color: rgba(0, 0, 0, 0.35);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .chart-section .chart-legend .legend-item .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .chart-section .chart-lock {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        body.light .chart-section .chart-lock {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .chart-section .chart-lock span {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+        }
+
+        body.light .chart-section .chart-lock span {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .chart-section .chart-lock .toggle-track {
+            width: 40px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+
+        body.light .chart-section .chart-lock .toggle-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-section .chart-lock .toggle-track .toggle-thumb {
+            width: 18px;
+            height: 18px;
+            background: #555;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: 0.3s;
+        }
+
+        body.light .chart-section .chart-lock .toggle-track .toggle-thumb {
+            background: #999;
+        }
+
+        .chart-section .chart-lock .toggle-track.active .toggle-thumb {
+            left: 19px;
+            background: #ff8c00;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .modal-actions .btn-save {
+            background: #ff8c00;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(255, 140, 0, 0.2);
+        }
+
+        .modal-actions .btn-save:hover {
+            background: #e67e00;
+        }
+
+        .modal-actions .btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .modal-actions .btn-cancel {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .view-modal .modal-content {
+            max-height: 90vh;
+        }
+
+        .view-modal .modal-content .view-image {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 12px;
+            margin: 10px 0;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .view-modal .modal-content .view-text {
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 8px 0;
+        }
+
+        body.light .view-modal .modal-content .view-text {
+            color: #1a1a1a;
+        }
+
+        .view-modal .modal-content .view-chart {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 12px;
+            margin: 10px 0;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .view-modal .modal-content .view-legend {
+            margin: 6px 0;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        body.light .view-modal .modal-content .view-legend {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .view-modal .modal-content .view-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 2px 0;
+        }
+
+        body.light .view-modal .modal-content .view-legend .legend-item {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .view-modal .modal-content .view-legend .legend-item .color-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(20, 20, 22, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 10px 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #e8e8e8;
+            font-size: 0.85rem;
+            font-family: inherit;
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        body.light .toast {
+            background: rgba(245, 240, 235, 0.92);
+            color: #1a1a1a;
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .sidebar {
+            position: absolute;
+            top: 0;
+            left: -320px;
+            width: 280px;
+            height: 100%;
+            z-index: 40;
+            background: rgba(12, 12, 14, 0.92);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 22px 20px 28px;
+            transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        body.light .sidebar {
+            background: rgba(245, 240, 235, 0.95);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        body.light .sidebar .sidebar-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar .sidebar-header h2 {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        body.light .sidebar .sidebar-header h2 {
+            color: #1a1a1a;
+        }
+
+        .sidebar .sidebar-header .close-menu {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.4rem;
+            cursor: pointer;
+            font-weight: 300;
+        }
+
+        body.light .sidebar .sidebar-header .close-menu {
+            color: rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            background: none;
+            width: 100%;
+            font-size: 0.9rem;
+            font-family: inherit;
+            text-align: left;
+            font-weight: 400;
+        }
+
+        body.light .sidebar .menu-item {
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        .sidebar .menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        body.light .sidebar .menu-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: #1a1a1a;
+        }
+
+        .sidebar .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 4px 0;
+        }
+
+        body.light .sidebar .divider {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        body.light .sidebar .theme-toggle {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .sidebar .theme-toggle span {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        body.light .sidebar .theme-toggle span {
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        .sidebar .theme-toggle .toggle-track {
+            width: 40px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 30px;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        body.light .sidebar .theme-toggle .toggle-track {
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        .sidebar .theme-toggle .toggle-track .toggle-thumb {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: 0.3s;
+        }
+
+        body.light .sidebar .theme-toggle .toggle-track .toggle-thumb {
+            background: #1a1a1a;
+        }
+
+        .sidebar .theme-toggle .toggle-track.active .toggle-thumb {
+            left: 19px;
+        }
+
+        .sidebar .bg-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 4px 2px;
+        }
+
+        .sidebar .bg-options .bg-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+            background-size: cover;
+            background-position: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar .bg-options .bg-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .sidebar .bg-options .bg-btn.active {
+            border-color: #ff8c00;
+        }
+
+        .sidebar .bg-options .bg-btn.custom-bg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.25);
+            font-weight: 300;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        body.light .sidebar .bg-options .bg-btn.custom-bg {
+            color: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .sidebar .bg-options .bg-btn[data-bg="default"] {
+            background: #0a0a0a;
+        }
+        body.light .sidebar .bg-options .bg-btn[data-bg="default"] {
+            background: #f5f0eb;
+        }
+        .sidebar .bg-options .bg-btn[data-bg="dark"] { background: #1a1a2e; }
+        .sidebar .bg-options .bg-btn[data-bg="blue"] { background: #0d1b2a; }
+        .sidebar .bg-options .bg-btn[data-bg="green"] { background: #0f1a12; }
+        .sidebar .bg-options .bg-btn[data-bg="purple"] { background: #1a0f1f; }
+
+        .sidebar .password-section {
+            margin-top: 6px;
+        }
+
+        .sidebar .password-section .password-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sidebar .password-section input[type="password"],
+        .sidebar .password-section input[type="text"] {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e8e8e8;
+            font-size: 0.85rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        body.light .sidebar .password-section input[type="password"],
+        body.light .sidebar .password-section input[type="text"] {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+        }
+
+        .sidebar .password-section input:focus {
+            border-color: #ff8c00;
+        }
+
+        .sidebar .password-section .password-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 140, 0, 0.15);
+            color: #ff8c00;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .sidebar .password-section .password-btn:hover {
+            background: rgba(255, 140, 0, 0.25);
+        }
+
+        .sidebar .password-section .password-status {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 4px;
+        }
+
+        body.light .sidebar .password-section .password-status {
+            color: rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar .transfer-section {
+            margin-top: 4px;
+        }
+
+        .sidebar .transfer-section .transfer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 4px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .sidebar .transfer-section .transfer-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        body.light .sidebar .transfer-section .transfer-row:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .sidebar .transfer-section .transfer-row span {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+
+        body.light .sidebar .transfer-section .transfer-row span {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        .sidebar .transfer-section .transfer-row .arrow {
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 1rem;
+        }
+
+        body.light .sidebar .transfer-section .transfer-row .arrow {
+            color: rgba(0, 0, 0, 0.1);
+        }
+
+        .fullscreen-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            width: 100%;
+            text-align: left;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(255, 140, 0, 0.2);
+        }
+
+        .sidebar-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 35;
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 10px 12px 80px;
+            }
+            .notes-grid {
+                gap: 6px;
+            }
+            .note-card {
+                padding: 8px 8px;
+                min-height: 70px;
+                max-height: 100px;
+            }
+            .fab {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8rem;
+                bottom: 22px;
+                right: 14px;
+            }
+            .modal-content {
+                padding: 16px 14px 20px;
+                border-radius: 20px;
+            }
+            .sidebar {
+                width: 250px;
+                left: -280px;
+            }
+            .toast {
+                bottom: 80px;
+                font-size: 0.75rem;
+                padding: 8px 16px;
+            }
+            .lock-screen .lock-title {
+                font-size: 1.2rem;
+                letter-spacing: 4px;
+            }
+            .lock-screen .lock-icon {
+                font-size: 2.8rem;
+            }
+            .recovery-window {
+                padding: 24px 20px;
+            }
+            .transfer-window {
+                padding: 20px 16px;
+            }
+            .password-dialog .dialog-box {
+                padding: 20px 16px;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .app {
+                border-radius: 28px;
+                max-height: 900px;
+                margin: 20px auto;
+                height: calc(100vh - 40px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+        <div class="app-bg" id="appBg"></div>
+
+        <div class="lock-screen" id="lockScreen">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-title">Заметки</div>
+            <div class="lock-subtitle">Введите пароль для входа</div>
+            <div class="lock-input-wrap">
+                <input type="password" class="lock-input" id="lockInput" placeholder="••••••" maxlength="20">
+            </div>
+            <div class="lock-error" id="lockError"></div>
+            <div class="lock-actions">
+                <button class="lock-btn lock-btn-unlock" id="lockUnlockBtn">Разблокировать</button>
+                <button class="lock-btn lock-btn-reset" id="lockResetBtn">Забыли пароль?</button>
+            </div>
+        </div>
+
+        <div class="recovery-overlay" id="recoveryOverlay">
+            <div class="recovery-window">
+                <div class="recovery-icon">!</div>
+                <div class="recovery-title">Восстановление доступа</div>
+                <div class="recovery-text">
+                    Если вы забыли пароль, вы можете восстановить доступ к приложению с помощью кнопки "Восстановить" ниже.<br><br>
+                    <strong>Обратите внимание, что при восстановлении доступа к веб-приложению будут удалены все данные пользователя (в том числе заметки, фото, диаграммы и другие данные пользователя). Полный список удаляемых данных размещён на сайте поддержки.</strong>
+                </div>
+                <div class="recovery-actions">
+                    <button class="btn-recovery-danger" id="recoveryConfirmBtn">Восстановить</button>
+                    <button class="btn-recovery-cancel" id="recoveryCancelBtn">Отмена</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="transfer-overlay" id="transferOverlay">
+            <div class="transfer-window">
+                <div class="transfer-icon">📦</div>
+                <div class="transfer-title">Перенос данных</div>
+                <div class="transfer-text">
+                    Если у вас появилось новое устройство, вы можете перенести все данные из этого приложения в другое приложение на вашем устройстве <span class="highlight">(кроме паролей)</span>.<br><br>
+                    <span style="font-size:0.85rem; opacity:0.7;">Внимание: после переноса данных пароли не сохраняются, вам нужно будет заново установить пароль на приложение.</span>
+                </div>
+                <div class="transfer-actions">
+                    <button class="btn-transfer-download" id="transferDownloadBtn">⬇️ Скачать все данные</button>
+                    <button class="btn-transfer-upload" id="transferUploadBtn">⬆️ Загрузить все данные</button>
+                    <button class="btn-transfer-instructions" id="transferInstructionsBtn">📖 Пошаговая инструкция</button>
+                    <div class="transfer-instructions" id="transferInstructions">
+                        <div class="step">
+                            <span class="num">1.</span>
+                            <span class="text">На старом устройстве нажмите «Скачать все данные» и сохраните файл</span>
+                        </div>
+                        <div class="step">
+                            <span class="num">2.</span>
+                            <span class="text">Перенесите файл на новое устройство (через облако, USB или мессенджер)</span>
+                        </div>
+                        <div class="step">
+                            <span class="num">3.</span>
+                            <span class="text">На новом устройстве откройте это приложение и нажмите «Загрузить все данные»</span>
+                        </div>
+                        <div class="step">
+                            <span class="num">4.</span>
+                            <span class="text">Выберите файл — все данные будут перенесены автоматически</span>
+                        </div>
+                        <div class="file-note">
+                            📄 Файл будет называться <strong>.nextnotes</strong> или <strong>.nextnotes.json</strong> в зависимости от вашего устройства
+                        </div>
+                    </div>
+                    <button class="btn-transfer-close" id="transferCloseBtn">Закрыть</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="password-dialog" id="passwordDialog">
+            <div class="dialog-box">
+                <div class="dialog-title">🔑 Введите пароль</div>
+                <input type="password" class="dialog-input" id="dialogPasswordInput" placeholder="••••••" maxlength="20">
+                <div class="dialog-error" id="dialogError"></div>
+                <div class="dialog-actions">
+                    <button class="dialog-btn-confirm" id="dialogConfirmBtn">Подтвердить</button>
+                    <button class="dialog-btn-cancel" id="dialogCancelBtn">Отмена</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="top-bar">
+            <button class="menu-btn" id="menuBtn">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="title">Заметки</div>
+            <div class="spacer"></div>
+        </div>
+
+        <div class="content" id="content">
+            <div class="empty-state" id="emptyState">
+                <div class="icon">+</div>
+                <h2>Нет заметок</h2>
+                <p>Создайте свою первую заметку</p>
+            </div>
+            <div class="notes-grid" id="notesContainer"></div>
+        </div>
+
+        <button class="fab" id="fabBtn">+</button>
+
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-content" id="modalContent">
+                <h3 id="modalTitle">Новая заметка</h3>
+                <input type="text" id="noteTitleInput" placeholder="Заголовок">
+                <textarea id="noteContentInput" placeholder="Текст заметки..."></textarea>
+
+                <div class="toggle-switch">
+                    <span>✏️ Текстовый маркер</span>
+                    <div class="toggle-track" id="markerToggle">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+
+                <div class="marker-section" id="markerSection">
+                    <div class="marker-tools">
+                        <button id="clearMarkerBtn">🗑️ Очистить</button>
+                        <button id="recognizeBtn">🔍 Распознать</button>
+                        <button id="expandMarkerBtn">⛶ Полноэкранный режим</button>
+                        <div class="color-picker">
+                            <input type="color" id="markerColor" value="#ff8c00">
+                        </div>
+                    </div>
+                    <div class="marker-canvas-wrap" id="markerCanvasWrap">
+                        <canvas id="markerCanvas" width="800" height="450"></canvas>
+                        <div class="fullscreen-controls" id="fullscreenControls" style="display:none;">
+                            <button id="fsExitBtn">✕ Выйти</button>
+                        </div>
+                    </div>
+                    <div class="marker-actions">
+                        <span class="recognize-status" id="recognizeStatus">Нарисуйте текст и нажмите "Распознать"</span>
+                    </div>
+                </div>
+
+                <div class="toggle-switch">
+                    <span>🖼️ Добавить фото</span>
+                    <div class="toggle-track" id="photoToggle">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+
+                <div class="photo-section" id="photoSection">
+                    <div class="photo-upload-wrap">
+                        <div class="photo-row">
+                            <label for="photoInput">📁 Выбрать файл</label>
+                            <input type="file" id="photoInput" accept="image/*">
+                            <input type="text" class="photo-url-input" id="photoUrlInput" placeholder="Ссылка на фото">
+                            <button class="photo-load-btn" id="photoLoadBtn">Загрузить</button>
+                        </div>
+                    </div>
+                    <img id="photoPreview" class="photo-preview" style="display:none;" />
+                </div>
+
+                <div class="toggle-switch">
+                    <span>📊 Диаграмма</span>
+                    <div class="toggle-track" id="chartToggle">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+
+                <div class="chart-section" id="chartSection">
+                    <div class="chart-tabs">
+                        <button class="active" data-chart="pie">Круговая</button>
+                        <button data-chart="bar">Столбчатая</button>
+                    </div>
+                    <div class="chart-title" id="chartSubtitle">📊 Круговая диаграмма</div>
+                    <div id="chartRows">
+                        <div class="chart-row">
+                            <input type="text" placeholder="Название" value="Доля 1">
+                            <input type="number" placeholder="%" value="50" min="1" max="100">
+                            <input type="color" value="#ff8c00">
+                            <button class="remove-chart-row">✕</button>
+                        </div>
+                        <div class="chart-row">
+                            <input type="text" placeholder="Название" value="Доля 2">
+                            <input type="number" placeholder="%" value="30" min="1" max="100">
+                            <input type="color" value="#4facfe">
+                            <button class="remove-chart-row">✕</button>
+                        </div>
+                        <div class="chart-row">
+                            <input type="text" placeholder="Название" value="Доля 3">
+                            <input type="number" placeholder="%" value="20" min="1" max="100">
+                            <input type="color" value="#34d399">
+                            <button class="remove-chart-row">✕</button>
+                        </div>
+                    </div>
+                    <button id="addChartRow" style="padding:4px 14px; border:none; border-radius:6px; background:rgba(255,140,0,0.1); color:#ff8c00; cursor:pointer; font-size:0.75rem; font-family:inherit;">+ Добавить долю</button>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="chartCanvas" width="400" height="400"></canvas>
+                        <div class="chart-legend" id="chartLegend"></div>
+                    </div>
+                    <div class="chart-lock">
+                        <span>🔒 Зафиксировать</span>
+                        <div class="toggle-track" id="chartLockToggle">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-cancel" id="modalCancel">Отмена</button>
+                    <button class="btn-save" id="modalSave">Сохранить</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay view-modal" id="viewModalOverlay">
+            <div class="modal-content">
+                <h3 id="viewTitle">Заметка</h3>
+                <div id="viewBody"></div>
+                <div class="modal-actions">
+                    <button class="btn-cancel" id="viewCloseBtn">Закрыть</button>
+                    <button class="btn-save" id="viewEditBtn">✏️ Редактировать</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Настройки</h2>
+                <button class="close-menu" id="closeMenuBtn">✕</button>
+            </div>
+
+            <button class="fullscreen-btn" id="fullscreenBtn">⛶ Полноэкранный режим</button>
+
+            <div class="theme-toggle">
+                <span id="themeLabel">Тёмная тема</span>
+                <div class="toggle-track" id="themeToggle">
+                    <div class="toggle-thumb"></div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="color:rgba(255,255,255,0.3); font-size:0.75rem; padding:0 14px 2px; letter-spacing:0.5px;">
+                Фон приложения
+            </div>
+            <div class="bg-options" id="bgOptions">
+                <button class="bg-btn active" data-bg="default"></button>
+                <button class="bg-btn" data-bg="dark"></button>
+                <button class="bg-btn" data-bg="blue"></button>
+                <button class="bg-btn" data-bg="green"></button>
+                <button class="bg-btn" data-bg="purple"></button>
+                <button class="bg-btn custom-bg" data-bg="custom">+</button>
+                <input type="file" id="customBgInput" accept="image/*" style="display:none;">
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="color:rgba(255,255,255,0.3); font-size:0.75rem; padding:0 14px 2px; letter-spacing:0.5px;">
+                Пароль
+            </div>
+            <div class="password-section">
+                <div class="password-row">
+                    <input type="password" id="passwordInput" placeholder="Новый пароль">
+                    <button class="password-btn" id="passwordSetBtn">Установить</button>
+                </div>
+                <div class="password-status" id="passwordStatus">Пароль не установлен</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="color:rgba(255,255,255,0.3); font-size:0.75rem; padding:0 14px 2px; letter-spacing:0.5px;">
+                Данные
+            </div>
+            <div class="transfer-section">
+                <div class="transfer-row" id="transferRow">
+                    <span>📦 Перенос данных</span>
+                    <span class="arrow">→</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <button class="menu-item" id="clearAllBtn">
+                Очистить все заметки
+            </button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- СОСТОЯНИЕ ----------
+            let notes = [];
+            let currentTheme = 'dark';
+            let currentBg = 'default';
+            let customBg = null;
+            let editingIndex = -1;
+            let isModalOpen = false;
+            let isViewOpen = false;
+            let viewNoteIndex = -1;
+            let chartType = 'pie';
+            let password = '';
+            let isLocked = true;
+
+            let markerMode = false;
+            let markerColor = '#ff8c00';
+            let isDrawing = false;
+            let lastX = 0, lastY = 0;
+            let markerData = null;
+            let isMarkerFullscreen = false;
+
+            let photoMode = false;
+            let photoData = null;
+
+            let chartMode = false;
+            let chartLocked = false;
+            let chartDataUrl = null;
+            let chartLegendData = [];
+
+            let longPressTimer = null;
+
+            // DOM
+            const app = document.getElementById('app');
+            const appBg = document.getElementById('appBg');
+            const notesContainer = document.getElementById('notesContainer');
+            const emptyState = document.getElementById('emptyState');
+            const fabBtn = document.getElementById('fabBtn');
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalContent = document.getElementById('modalContent');
+            const modalTitle = document.getElementById('modalTitle');
+            const noteTitleInput = document.getElementById('noteTitleInput');
+            const noteContentInput = document.getElementById('noteContentInput');
+            const modalCancel = document.getElementById('modalCancel');
+            const modalSave = document.getElementById('modalSave');
+            const menuBtn = document.getElementById('menuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const closeMenuBtn = document.getElementById('closeMenuBtn');
+            const themeToggle = document.getElementById('themeToggle');
+            const themeLabel = document.getElementById('themeLabel');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const bgOptions = document.getElementById('bgOptions');
+            const customBgInput = document.getElementById('customBgInput');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const toast = document.getElementById('toast');
+
+            // Lock
+            const lockScreen = document.getElementById('lockScreen');
+            const lockInput = document.getElementById('lockInput');
+            const lockError = document.getElementById('lockError');
+            const lockUnlockBtn = document.getElementById('lockUnlockBtn');
+            const lockResetBtn = document.getElementById('lockResetBtn');
+
+            // Recovery
+            const recoveryOverlay = document.getElementById('recoveryOverlay');
+            const recoveryConfirmBtn = document.getElementById('recoveryConfirmBtn');
+            const recoveryCancelBtn = document.getElementById('recoveryCancelBtn');
+
+            // Transfer
+            const transferOverlay = document.getElementById('transferOverlay');
+            const transferRow = document.getElementById('transferRow');
+            const transferDownloadBtn = document.getElementById('transferDownloadBtn');
+            const transferUploadBtn = document.getElementById('transferUploadBtn');
+            const transferInstructionsBtn = document.getElementById('transferInstructionsBtn');
+            const transferInstructions = document.getElementById('transferInstructions');
+            const transferCloseBtn = document.getElementById('transferCloseBtn');
+
+            // Password dialog
+            const passwordDialog = document.getElementById('passwordDialog');
+            const dialogPasswordInput = document.getElementById('dialogPasswordInput');
+            const dialogError = document.getElementById('dialogError');
+            const dialogConfirmBtn = document.getElementById('dialogConfirmBtn');
+            const dialogCancelBtn = document.getElementById('dialogCancelBtn');
+
+            // Password
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordSetBtn = document.getElementById('passwordSetBtn');
+            const passwordStatus = document.getElementById('passwordStatus');
+
+            const viewModalOverlay = document.getElementById('viewModalOverlay');
+            const viewTitle = document.getElementById('viewTitle');
+            const viewBody = document.getElementById('viewBody');
+            const viewCloseBtn = document.getElementById('viewCloseBtn');
+            const viewEditBtn = document.getElementById('viewEditBtn');
+
+            const markerToggle = document.getElementById('markerToggle');
+            const markerSection = document.getElementById('markerSection');
+            const clearMarkerBtn = document.getElementById('clearMarkerBtn');
+            const recognizeBtn = document.getElementById('recognizeBtn');
+            const expandMarkerBtn = document.getElementById('expandMarkerBtn');
+            const markerColorInput = document.getElementById('markerColor');
+            const markerCanvas = document.getElementById('markerCanvas');
+            const markerCanvasWrap = document.getElementById('markerCanvasWrap');
+            const recognizeStatus = document.getElementById('recognizeStatus');
+            const fullscreenControls = document.getElementById('fullscreenControls');
+            const fsExitBtn = document.getElementById('fsExitBtn');
+
+            const photoToggle = document.getElementById('photoToggle');
+            const photoSection = document.getElementById('photoSection');
+            const photoInput = document.getElementById('photoInput');
+            const photoUrlInput = document.getElementById('photoUrlInput');
+            const photoLoadBtn = document.getElementById('photoLoadBtn');
+            const photoPreview = document.getElementById('photoPreview');
+
+            const chartToggle = document.getElementById('chartToggle');
+            const chartSection = document.getElementById('chartSection');
+            const chartRows = document.getElementById('chartRows');
+            const addChartRowBtn = document.getElementById('addChartRow');
+            const chartCanvas = document.getElementById('chartCanvas');
+            const chartLegend = document.getElementById('chartLegend');
+            const chartLockToggle = document.getElementById('chartLockToggle');
+            const chartTabs = document.querySelectorAll('.chart-tabs button');
+
+            // ---------- ТОСТ ----------
+            let toastTimer = null;
+
+            function showToast(text) {
+                toast.textContent = text;
+                toast.classList.add('show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            // ---------- ПАРОЛЬ ----------
+            function loadPassword() {
+                try {
+                    const saved = localStorage.getItem('notes_password');
+                    if (saved) {
+                        password = saved;
+                        passwordStatus.textContent = '✅ Пароль установлен';
+                        isLocked = true;
+                        lockScreen.classList.add('active');
+                        lockInput.value = '';
+                        lockError.textContent = '';
+                    } else {
+                        password = '';
+                        passwordStatus.textContent = 'Пароль не установлен';
+                        isLocked = false;
+                        lockScreen.classList.remove('active');
+                    }
+                } catch (e) {
+                    console.warn('Ошибка загрузки пароля:', e);
+                    password = '';
+                    isLocked = false;
+                    lockScreen.classList.remove('active');
+                }
+            }
+
+            function savePassword(pwd) {
+                try {
+                    localStorage.setItem('notes_password', pwd);
+                    password = pwd;
+                    passwordStatus.textContent = '✅ Пароль установлен';
+                    showToast('🔒 Пароль установлен');
+                    isLocked = true;
+                    lockScreen.classList.add('active');
+                    lockInput.value = '';
+                    lockError.textContent = '';
+                } catch (e) {
+                    console.warn('Ошибка сохранения пароля:', e);
+                }
+            }
+
+            function removePassword() {
+                try {
+                    localStorage.removeItem('notes_password');
+                    password = '';
+                    isLocked = false;
+                    passwordStatus.textContent = 'Пароль не установлен';
+                    lockScreen.classList.remove('active');
+                    showToast('🔓 Пароль удалён');
+                } catch (e) {
+                    console.warn('Ошибка удаления пароля:', e);
+                }
+            }
+
+            function lockApp() {
+                if (password) {
+                    isLocked = true;
+                    lockScreen.classList.add('active');
+                    lockInput.value = '';
+                    lockError.textContent = '';
+                    showToast('🔒 Приложение заблокировано');
+                }
+            }
+
+            function unlockApp(pwd) {
+                if (pwd === password) {
+                    isLocked = false;
+                    lockScreen.classList.remove('active');
+                    lockInput.value = '';
+                    lockError.textContent = '';
+                    showToast('🔓 Добро пожаловать!');
+                    return true;
+                } else {
+                    lockError.textContent = '❌ Неверный пароль';
+                    return false;
+                }
+            }
+
+            // ---------- ВОССТАНОВЛЕНИЕ ----------
+            function showRecovery() {
+                recoveryOverlay.classList.add('active');
+            }
+
+            function hideRecovery() {
+                recoveryOverlay.classList.remove('active');
+            }
+
+            function performRecovery() {
+                notes = [];
+                customBg = null;
+                currentBg = 'default';
+                photoData = null;
+                chartDataUrl = null;
+                markerData = null;
+                removePassword();
+                saveData();
+                applyBg();
+                renderNotes();
+                hideRecovery();
+                isLocked = false;
+                lockScreen.classList.remove('active');
+                showToast('🗑️ Все данные удалены, доступ восстановлен');
+            }
+
+            // ---------- ПЕРЕНОС ДАННЫХ ----------
+            function showTransfer() {
+                transferOverlay.classList.add('active');
+                transferInstructions.classList.remove('active');
+            }
+
+            function hideTransfer() {
+                transferOverlay.classList.remove('active');
+                transferInstructions.classList.remove('active');
+            }
+
+            function toggleInstructions() {
+                transferInstructions.classList.toggle('active');
+            }
+
+            // Экспорт данных
+            function exportData() {
+                const pwd = dialogPasswordInput.value;
+                if (pwd !== password) {
+                    dialogError.textContent = '❌ Неверный пароль';
+                    return;
+                }
+
+                dialogError.textContent = '';
+                dialogPasswordInput.value = '';
+                passwordDialog.classList.remove('active');
+
+                const data = {
+                    notes: notes,
+                    theme: currentTheme,
+                    bg: currentBg,
+                    customBg: customBg,
+                    password: password,
+                    version: '1.0'
+                };
+
+                const json = JSON.stringify(data);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'notes_backup.nextnotes';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 5000);
+                showToast('✅ Данные экспортированы');
+                hideTransfer();
+            }
+
+            // Импорт данных
+            function importData() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.nextnotes,.json';
+                input.onchange = function(e) {
+                    const file = this.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            if (!data.notes || !data.version) {
+                                showToast('❌ Неверный формат файла');
+                                return;
+                            }
+                            notes = data.notes || [];
+                            currentTheme = data.theme || 'dark';
+                            currentBg = data.bg || 'default';
+                            customBg = data.customBg || null;
+                            if (data.password) {
+                                password = data.password;
+                                passwordStatus.textContent = '✅ Пароль установлен';
+                                isLocked = true;
+                                lockScreen.classList.add('active');
+                            }
+                            saveData();
+                            applyTheme();
+                            applyBg();
+                            renderNotes();
+                            showToast(`✅ Загружено ${notes.length} заметок`);
+                            hideTransfer();
+                        } catch (err) {
+                            showToast('❌ Ошибка загрузки файла');
+                            console.error(err);
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            }
+
+            // ---------- ЗАГРУЗКА ----------
+            function loadData() {
+                try {
+                    const saved = localStorage.getItem('notes_data_v12');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        notes = data.notes || [];
+                        currentTheme = data.theme || 'dark';
+                        currentBg = data.bg || 'default';
+                        customBg = data.customBg || null;
+                        console.log('📂 Загружено заметок:', notes.length);
+                    } else {
+                        console.log('📂 Нет сохранённых данных');
+                    }
+                } catch (e) {
+                    console.warn('Ошибка загрузки:', e);
+                    notes = [];
+                }
+                applyTheme();
+                applyBg();
+                renderNotes();
+                loadPassword();
+
+                setTimeout(() => {
+                    if (!localStorage.getItem('fullscreen_asked')) {
+                        if (confirm('Перейти в полноэкранный режим для удобства?')) {
+                            toggleFullscreen();
+                        }
+                        localStorage.setItem('fullscreen_asked', 'true');
+                    }
+                }, 1000);
+            }
+
+            function saveData() {
+                try {
+                    const data = {
+                        notes: notes,
+                        theme: currentTheme,
+                        bg: currentBg,
+                        customBg: customBg
+                    };
+                    localStorage.setItem('notes_data_v12', JSON.stringify(data));
+                    console.log('💾 Сохранено заметок:', notes.length);
+                } catch (e) {
+                    console.warn('Ошибка сохранения:', e);
+                }
+            }
+
+            // ---------- ТЕМА ----------
+            function applyTheme() {
+                if (currentTheme === 'light') {
+                    document.body.classList.add('light');
+                    themeToggle.classList.add('active');
+                    themeLabel.textContent = 'Светлая тема';
+                } else {
+                    document.body.classList.remove('light');
+                    themeToggle.classList.remove('active');
+                    themeLabel.textContent = 'Тёмная тема';
+                }
+                applyBg();
+                saveData();
+            }
+
+            function toggleTheme() {
+                currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                applyTheme();
+            }
+
+            // ---------- ФОН ----------
+            function applyBg() {
+                appBg.className = 'app-bg';
+                if (currentBg === 'default') {
+                    appBg.style.background = currentTheme === 'dark' ? '#0a0a0a' : '#f5f0eb';
+                    appBg.style.backgroundImage = 'none';
+                } else if (currentBg === 'custom' && customBg) {
+                    appBg.classList.add('image-bg');
+                    appBg.style.backgroundImage = `url(${customBg})`;
+                } else {
+                    const bgMap = { 'dark': '#1a1a2e', 'blue': '#0d1b2a', 'green': '#0f1a12', 'purple': '#1a0f1f' };
+                    appBg.style.background = bgMap[currentBg] || (currentTheme === 'dark' ? '#0a0a0a' : '#f5f0eb');
+                    appBg.style.backgroundImage = 'none';
+                }
+                document.querySelectorAll('.bg-options .bg-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.bg === currentBg);
+                });
+                saveData();
+            }
+
+            // ---------- РЕНДЕРИНГ ----------
+            function renderNotes() {
+                notesContainer.innerHTML = '';
+                if (notes.length === 0) {
+                    emptyState.style.display = 'flex';
+                    return;
+                }
+                emptyState.style.display = 'none';
+
+                notes.forEach((note, index) => {
+                    const realIndex = notes.indexOf(note);
+                    const card = document.createElement('div');
+                    card.className = 'note-card';
+                    card.dataset.index = realIndex;
+
+                    card.addEventListener('pointerdown', function(e) {
+                        if (isLocked) return;
+                        longPressTimer = setTimeout(() => {
+                            const actions = this.querySelector('.card-actions');
+                            if (actions) {
+                                actions.classList.toggle('show');
+                            }
+                            document.querySelectorAll('.note-card .card-actions.show').forEach(el => {
+                                if (el !== actions) el.classList.remove('show');
+                            });
+                            if (navigator.vibrate) navigator.vibrate(20);
+                        }, 600);
+                    });
+
+                    card.addEventListener('pointerup', function(e) {
+                        clearTimeout(longPressTimer);
+                        const actions = this.querySelector('.card-actions');
+                        if (actions && !actions.classList.contains('show')) {
+                            if (!isLocked) openViewModal(realIndex);
+                        }
+                    });
+
+                    card.addEventListener('pointerleave', function() {
+                        clearTimeout(longPressTimer);
+                    });
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'card-actions';
+
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'btn-delete';
+                    delBtn.textContent = '✕';
+                    delBtn.title = 'Удалить заметку';
+                    delBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (isLocked) return;
+                        if (confirm('Удалить эту заметку?')) {
+                            deleteNote(realIndex);
+                        }
+                        actionsDiv.classList.remove('show');
+                    });
+
+                    actionsDiv.appendChild(delBtn);
+                    card.appendChild(actionsDiv);
+
+                    const title = document.createElement('div');
+                    title.className = 'note-title';
+                    title.textContent = note.title || 'Без заголовка';
+                    card.appendChild(title);
+
+                    const preview = document.createElement('div');
+                    preview.className = 'note-preview';
+                    let text = note.text || '';
+                    if (text.length > 40) text = text.slice(0, 40) + '…';
+                    preview.textContent = text || '(пусто)';
+                    card.appendChild(preview);
+
+                    const meta = document.createElement('div');
+                    meta.className = 'note-meta';
+                    const dateSpan = document.createElement('span');
+                    dateSpan.textContent = new Date(note.date).toLocaleString('ru-RU', {
+                        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    const tags = document.createElement('span');
+                    if (note.image) tags.innerHTML += '<span class="note-tag">📷</span>';
+                    if (note.chart) tags.innerHTML += '<span class="note-tag">📊</span>';
+
+                    meta.appendChild(dateSpan);
+                    meta.appendChild(tags);
+                    card.appendChild(meta);
+                    notesContainer.appendChild(card);
+                });
+            }
+
+            // ---------- CRUD ----------
+            function addNote(title, text, image, chart, legend) {
+                if (!title.trim() && !text.trim() && !image && !chart) return;
+                notes.unshift({
+                    title: title.trim() || 'Без заголовка',
+                    text: text.trim() || '',
+                    image: image || null,
+                    chart: chart || null,
+                    legend: legend || null,
+                    date: Date.now()
+                });
+                saveData();
+                renderNotes();
+                showToast(`📝 Новая заметка создана`);
+                if (notes.length > 9) {
+                    showToast(`📄 Заметка появилась на странице ${Math.ceil(notes.length / 9)}`);
+                }
+            }
+
+            function updateNote(index, title, text, image, chart, legend) {
+                if (index < 0 || index >= notes.length) return;
+                notes[index] = {
+                    ...notes[index],
+                    title: title.trim() || 'Без заголовка',
+                    text: text.trim() || '',
+                    image: image || notes[index].image || null,
+                    chart: chart || notes[index].chart || null,
+                    legend: legend || notes[index].legend || null,
+                    date: Date.now()
+                };
+                saveData();
+                renderNotes();
+            }
+
+            function deleteNote(index) {
+                notes.splice(index, 1);
+                saveData();
+                renderNotes();
+            }
+
+            function clearAllNotes() {
+                if (notes.length === 0) {
+                    showToast('⚠️ Нет заметок для удаления');
+                    return;
+                }
+                if (isLocked) {
+                    showToast('⚠️ Приложение заблокировано');
+                    return;
+                }
+                const pwd = prompt('Введите пароль для подтверждения удаления всех заметок:');
+                if (pwd === null) return;
+                if (pwd === password) {
+                    if (confirm('Удалить все заметки? Это действие нельзя отменить.')) {
+                        notes = [];
+                        saveData();
+                        renderNotes();
+                        showToast('🗑️ Все заметки удалены');
+                    }
+                } else {
+                    showToast('❌ Неверный пароль');
+                }
+            }
+
+            // ---------- МАРКЕР ----------
+            function initMarkerCanvas() {
+                const rect = markerCanvas.parentElement.getBoundingClientRect();
+                const w = Math.min(800, rect.width - 14);
+                const h = w * (9 / 16);
+                markerCanvas.width = w;
+                markerCanvas.height = h;
+                markerCanvas.style.width = w + 'px';
+                markerCanvas.style.height = h + 'px';
+
+                const ctx = markerCanvas.getContext('2d');
+                ctx.fillStyle = currentTheme === 'dark' ? '#1a1a1a' : '#f0ebe6';
+                ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);
+
+                if (markerData) {
+                    const img = new Image();
+                    img.onload = function() {
+                        ctx.drawImage(img, 0, 0, markerCanvas.width, markerCanvas.height);
+                    };
+                    img.src = markerData;
+                }
+
+                setupMarkerEvents();
+            }
+
+            function setupMarkerEvents() {
+                markerCanvas.onmousedown = function(e) {
+                    if (!markerMode) return;
+                    isDrawing = true;
+                    const rect = markerCanvas.getBoundingClientRect();
+                    lastX = (e.clientX - rect.left) * (markerCanvas.width / rect.width);
+                    lastY = (e.clientY - rect.top) * (markerCanvas.height / rect.height);
+                };
+
+                markerCanvas.onmousemove = function(e) {
+                    if (!isDrawing || !markerMode) return;
+                    const rect = markerCanvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) * (markerCanvas.width / rect.width);
+                    const y = (e.clientY - rect.top) * (markerCanvas.height / rect.height);
+                    const ctx = markerCanvas.getContext('2d');
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(x, y);
+                    ctx.strokeStyle = markerColor;
+                    ctx.lineWidth = 3;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.stroke();
+                    lastX = x;
+                    lastY = y;
+                };
+
+                markerCanvas.onmouseup = function() {
+                    if (isDrawing) {
+                        isDrawing = false;
+                        markerData = markerCanvas.toDataURL();
+                    }
+                };
+
+                markerCanvas.onmouseleave = function() {
+                    if (isDrawing) {
+                        isDrawing = false;
+                        markerData = markerCanvas.toDataURL();
+                    }
+                };
+
+                markerCanvas.ontouchstart = function(e) {
+                    if (!markerMode) return;
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = markerCanvas.getBoundingClientRect();
+                    isDrawing = true;
+                    lastX = (touch.clientX - rect.left) * (markerCanvas.width / rect.width);
+                    lastY = (touch.clientY - rect.top) * (markerCanvas.height / rect.height);
+                };
+
+                markerCanvas.ontouchmove = function(e) {
+                    if (!isDrawing || !markerMode) return;
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = markerCanvas.getBoundingClientRect();
+                    const x = (touch.clientX - rect.left) * (markerCanvas.width / rect.width);
+                    const y = (touch.clientY - rect.top) * (markerCanvas.height / rect.height);
+                    const ctx = markerCanvas.getContext('2d');
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(x, y);
+                    ctx.strokeStyle = markerColor;
+                    ctx.lineWidth = 3;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.stroke();
+                    lastX = x;
+                    lastY = y;
+                };
+
+                markerCanvas.ontouchend = function() {
+                    if (isDrawing) {
+                        isDrawing = false;
+                        markerData = markerCanvas.toDataURL();
+                    }
+                };
+            }
+
+            function toggleMarker() {
+                markerMode = !markerMode;
+                markerToggle.classList.toggle('active');
+                markerSection.classList.toggle('active');
+                if (markerMode) {
+                    recognizeStatus.textContent = 'Нарисуйте текст и нажмите "Распознать"';
+                    setTimeout(initMarkerCanvas, 50);
+                } else {
+                    if (isMarkerFullscreen) {
+                        exitMarkerFullscreen();
+                    }
+                }
+            }
+
+            function clearMarker() {
+                if (!markerData && !markerMode) {
+                    alert('Нет рисунка для очистки');
+                    return;
+                }
+                if (confirm('Очистить рисунок?')) {
+                    const ctx = markerCanvas.getContext('2d');
+                    ctx.fillStyle = currentTheme === 'dark' ? '#1a1a1a' : '#f0ebe6';
+                    ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);
+                    markerData = null;
+                    recognizeStatus.textContent = 'Рисунок очищен';
+                }
+            }
+
+            function enterMarkerFullscreen() {
+                isMarkerFullscreen = true;
+                markerCanvasWrap.classList.add('fullscreen-canvas');
+                fullscreenControls.style.display = 'flex';
+                expandMarkerBtn.textContent = '⛶ Свернуть';
+                setTimeout(() => {
+                    const w = Math.min(window.innerWidth - 40, 1000);
+                    const h = w * (9 / 16);
+                    markerCanvas.width = w;
+                    markerCanvas.height = h;
+                    markerCanvas.style.width = w + 'px';
+                    markerCanvas.style.height = h + 'px';
+                    const ctx = markerCanvas.getContext('2d');
+                    ctx.fillStyle = currentTheme === 'dark' ? '#1a1a1a' : '#f0ebe6';
+                    ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);
+                    if (markerData) {
+                        const img = new Image();
+                        img.onload = function() {
+                            ctx.drawImage(img, 0, 0, markerCanvas.width, markerCanvas.height);
+                        };
+                        img.src = markerData;
+                    }
+                    setupMarkerEvents();
+                }, 50);
+            }
+
+            function exitMarkerFullscreen() {
+                isMarkerFullscreen = false;
+                markerCanvasWrap.classList.remove('fullscreen-canvas');
+                fullscreenControls.style.display = 'none';
+                expandMarkerBtn.textContent = '⛶ Полноэкранный режим';
+                setTimeout(initMarkerCanvas, 50);
+            }
+
+            // ---------- РАСПОЗНАВАНИЕ ----------
+            async function recognizeText() {
+                if (!markerData) {
+                    recognizeStatus.textContent = '⚠️ Сначала нарисуйте текст';
+                    return;
+                }
+
+                recognizeStatus.textContent = '⏳ Распознавание...';
+                recognizeBtn.disabled = true;
+
+                try {
+                    if (typeof Tesseract === 'undefined') {
+                        recognizeStatus.textContent = '⚠️ Загрузка библиотеки...';
+                        await new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+                            script.onload = resolve;
+                            script.onerror = reject;
+                            document.head.appendChild(script);
+                        });
+                    }
+
+                    const result = await Tesseract.recognize(markerData, 'rus+eng', {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                recognizeStatus.textContent = `⏳ Распознавание: ${Math.round(m.progress * 100)}%`;
+                            }
+                        }
+                    });
+
+                    const text = result.data.text.trim();
+                    if (text) {
+                        noteContentInput.value = noteContentInput.value + (noteContentInput.value ? '\n' : '') + text;
+                        recognizeStatus.textContent = `✅ Распознано: "${text.slice(0, 50)}${text.length > 50 ? '…' : ''}"`;
+                    } else {
+                        recognizeStatus.textContent = '⚠️ Текст не найден на рисунке';
+                    }
+                } catch (error) {
+                    console.error('OCR ошибка:', error);
+                    recognizeStatus.textContent = '⚠️ Ошибка распознавания: ' + error.message;
+                } finally {
+                    recognizeBtn.disabled = false;
+                }
+            }
+
+            // ---------- ФОТО ----------
+            function togglePhoto() {
+                photoMode = !photoMode;
+                photoToggle.classList.toggle('active');
+                photoSection.classList.toggle('active');
+                if (!photoMode) {
+                    photoData = null;
+                    photoPreview.style.display = 'none';
+                    photoPreview.src = '';
+                }
+            }
+
+            function loadPhotoFromUrl(url) {
+                if (!url) return;
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    photoData = url;
+                    photoPreview.src = url;
+                    photoPreview.style.display = 'block';
+                    showToast('✅ Фото загружено');
+                };
+                img.onerror = function() {
+                    alert('Не удалось загрузить фото по ссылке');
+                };
+                img.src = url;
+            }
+
+            // ---------- ДИАГРАММЫ ----------
+            function toggleChart() {
+                chartMode = !chartMode;
+                chartToggle.classList.toggle('active');
+                chartSection.classList.toggle('active');
+                if (chartMode) {
+                    setTimeout(drawChart, 100);
+                    setupChartDrag();
+                }
+            }
+
+            function toggleChartLock() {
+                chartLocked = !chartLocked;
+                chartLockToggle.classList.toggle('active');
+            }
+
+            function switchChartType(type) {
+                chartType = type;
+                chartTabs.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.chart === type);
+                });
+                document.getElementById('chartSubtitle').textContent =
+                    type === 'pie' ? '📊 Круговая диаграмма' : '📊 Столбчатая диаграмма';
+                drawChart();
+            }
+
+            let chartDragData = null;
+            let chartIsDragging = false;
+
+            function setupChartDrag() {
+                chartCanvas.onmousedown = function(e) {
+                    if (chartLocked) return;
+                    const rect = chartCanvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width * chartCanvas.width;
+                    const y = (e.clientY - rect.top) / rect.height * chartCanvas.height;
+
+                    if (chartType === 'pie') {
+                        const cx = chartCanvas.width / 2;
+                        const cy = chartCanvas.height / 2;
+                        const dx = x - cx;
+                        const dy = y - cy;
+                        if (Math.sqrt(dx * dx + dy * dy) < 30) return;
+                        const angle = Math.atan2(dy, dx);
+                        const data = getChartData();
+                        const total = data.reduce((sum, d) => sum + d.value, 0);
+                        if (total === 0) return;
+
+                        let startAngle = -Math.PI / 2;
+                        for (let i = 0; i < data.length; i++) {
+                            const endAngle = startAngle + (data[i].value / total) * 2 * Math.PI;
+                            if (angle >= startAngle && angle < endAngle) {
+                                chartDragData = { index: i, startAngle: startAngle, data: data[i] };
+                                chartIsDragging = true;
+                                document.addEventListener('mousemove', onChartDrag);
+                                document.addEventListener('mouseup', onChartDragEnd);
+                                break;
+                            }
+                            startAngle = endAngle;
+                        }
+                    } else {
+                        const data = getChartData();
+                        if (data.length === 0) return;
+                        const padding = 40;
+                        const chartW = chartCanvas.width - padding * 2;
+                        const barWidth = Math.min(chartW / data.length * 0.6, 50);
+                        const gap = (chartW - barWidth * data.length) / (data.length + 1);
+
+                        for (let i = 0; i < data.length; i++) {
+                            const barX = padding + gap + i * (barWidth + gap);
+                            if (x >= barX && x <= barX + barWidth) {
+                                chartDragData = { index: i };
+                                chartIsDragging = true;
+                                document.addEventListener('mousemove', onChartDrag);
+                                document.addEventListener('mouseup', onChartDragEnd);
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                chartCanvas.ontouchstart = function(e) {
+                    if (chartLocked) return;
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = chartCanvas.getBoundingClientRect();
+                    const x = (touch.clientX - rect.left) / rect.width * chartCanvas.width;
+                    const y = (touch.clientY - rect.top) / rect.height * chartCanvas.height;
+
+                    if (chartType === 'pie') {
+                        const cx = chartCanvas.width / 2;
+                        const cy = chartCanvas.height / 2;
+                        const dx = x - cx;
+                        const dy = y - cy;
+                        if (Math.sqrt(dx * dx + dy * dy) < 30) return;
+                        const angle = Math.atan2(dy, dx);
+                        const data = getChartData();
+                        const total = data.reduce((sum, d) => sum + d.value, 0);
+                        if (total === 0) return;
+
+                        let startAngle = -Math.PI / 2;
+                        for (let i = 0; i < data.length; i++) {
+                            const endAngle = startAngle + (data[i].value / total) * 2 * Math.PI;
+                            if (angle >= startAngle && angle < endAngle) {
+                                chartDragData = { index: i, startAngle: startAngle, data: data[i] };
+                                chartIsDragging = true;
+                                document.addEventListener('touchmove', onChartDragTouch);
+                                document.addEventListener('touchend', onChartDragEndTouch);
+                                break;
+                            }
+                            startAngle = endAngle;
+                        }
+                    } else {
+                        const data = getChartData();
+                        if (data.length === 0) return;
+                        const padding = 40;
+                        const chartW = chartCanvas.width - padding * 2;
+                        const barWidth = Math.min(chartW / data.length * 0.6, 50);
+                        const gap = (chartW - barWidth * data.length) / (data.length + 1);
+
+                        for (let i = 0; i < data.length; i++) {
+                            const barX = padding + gap + i * (barWidth + gap);
+                            if (x >= barX && x <= barX + barWidth) {
+                                chartDragData = { index: i };
+                                chartIsDragging = true;
+                                document.addEventListener('touchmove', onChartDragTouch);
+                                document.addEventListener('touchend', onChartDragEndTouch);
+                                break;
+                            }
+                        }
+                    }
+                };
+            }
+
+            function onChartDrag(e) {
+                if (!chartIsDragging || !chartDragData) return;
+                const rect = chartCanvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width * chartCanvas.width;
+                const y = (e.clientY - rect.top) / rect.height * chartCanvas.height;
+
+                if (chartType === 'pie') {
+                    const cx = chartCanvas.width / 2;
+                    const cy = chartCanvas.height / 2;
+                    const angle = Math.atan2(y - cy, x - cx);
+                    updateSingleChartDrag(angle);
+                } else {
+                    updateBarDrag(y);
+                }
+            }
+
+            function onChartDragTouch(e) {
+                e.preventDefault();
+                if (!chartIsDragging || !chartDragData) return;
+                const touch = e.touches[0];
+                const rect = chartCanvas.getBoundingClientRect();
+                const x = (touch.clientX - rect.left) / rect.width * chartCanvas.width;
+                const y = (touch.clientY - rect.top) / rect.height * chartCanvas.height;
+
+                if (chartType === 'pie') {
+                    const cx = chartCanvas.width / 2;
+                    const cy = chartCanvas.height / 2;
+                    const angle = Math.atan2(y - cy, x - cx);
+                    updateSingleChartDrag(angle);
+                } else {
+                    updateBarDrag(y);
+                }
+            }
+
+            function updateSingleChartDrag(angle) {
+                const data = getChartData();
+                if (data.length <= 1) return;
+                const total = data.reduce((sum, d) => sum + d.value, 0);
+                if (total === 0) return;
+
+                let newValue = Math.max(1, Math.round((angle - chartDragData.startAngle) / (2 * Math.PI) * total));
+                const oldValue = data[chartDragData.index].value;
+                const diff = newValue - oldValue;
+
+                if (Math.abs(diff) < 1) return;
+
+                const nextIndex = (chartDragData.index + 1) % data.length;
+                if (diff > 0) {
+                    const take = Math.min(data[nextIndex].value - 1, diff);
+                    if (take > 0) {
+                        data[nextIndex].value -= take;
+                        data[chartDragData.index].value += take;
+                    }
+                } else {
+                    const give = Math.min(-diff, data[chartDragData.index].value - 1);
+                    if (give > 0) {
+                        data[chartDragData.index].value -= give;
+                        data[nextIndex].value += give;
+                    }
+                }
+
+                const rows = chartRows.querySelectorAll('.chart-row');
+                rows.forEach((row, i) => {
+                    if (i < data.length) {
+                        const inputs = row.querySelectorAll('input');
+                        inputs[1].value = data[i].value;
+                    }
+                });
+
+                drawChart();
+            }
+
+            function updateBarDrag(y) {
+                const data = getChartData();
+                if (data.length === 0) return;
+                const padding = 40;
+                const chartH = chartCanvas.height - padding * 2;
+                const maxVal = Math.max(...data.map(d => d.value), 1);
+
+                let newValue = Math.round((1 - (y - padding) / chartH) * maxVal);
+                newValue = Math.max(1, Math.min(100, newValue));
+
+                const oldValue = data[chartDragData.index].value;
+                const diff = newValue - oldValue;
+
+                if (Math.abs(diff) < 1) return;
+
+                const nextIndex = (chartDragData.index + 1) % data.length;
+                if (diff > 0) {
+                    const take = Math.min(data[nextIndex].value - 1, diff);
+                    if (take > 0) {
+                        data[nextIndex].value -= take;
+                        data[chartDragData.index].value += take;
+                    }
+                } else {
+                    const give = Math.min(-diff, data[chartDragData.index].value - 1);
+                    if (give > 0) {
+                        data[chartDragData.index].value -= give;
+                        data[nextIndex].value += give;
+                    }
+                }
+
+                const rows = chartRows.querySelectorAll('.chart-row');
+                rows.forEach((row, i) => {
+                    if (i < data.length) {
+                        const inputs = row.querySelectorAll('input');
+                        inputs[1].value = data[i].value;
+                    }
+                });
+
+                drawChart();
+            }
+
+            function onChartDragEnd() {
+                chartIsDragging = false;
+                chartDragData = null;
+                document.removeEventListener('mousemove', onChartDrag);
+                document.removeEventListener('mouseup', onChartDragEnd);
+            }
+
+            function onChartDragEndTouch() {
+                chartIsDragging = false;
+                chartDragData = null;
+                document.removeEventListener('touchmove', onChartDragTouch);
+                document.removeEventListener('touchend', onChartDragEndTouch);
+            }
+
+            function getChartData() {
+                const rows = chartRows.querySelectorAll('.chart-row');
+                const data = [];
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const name = inputs[0].value.trim() || 'Доля';
+                    const value = parseFloat(inputs[1].value) || 0;
+                    const color = inputs[2].value || '#ff8c00';
+                    if (value > 0) {
+                        data.push({ name, value, color });
+                    }
+                });
+                return data;
+            }
+
+            function drawChart() {
+                const data = getChartData();
+                const total = data.reduce((sum, d) => sum + d.value, 0);
+
+                if (total === 0 || data.length === 0) {
+                    const ctx = chartCanvas.getContext('2d');
+                    ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                    ctx.font = '14px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Добавьте данные', chartCanvas.width / 2, chartCanvas.height / 2);
+                    chartLegend.innerHTML = '<span style="color:rgba(255,255,255,0.2); font-size:0.7rem;">Нет данных</span>';
+                    chartLegendData = [];
+                    return;
+                }
+
+                const ctx = chartCanvas.getContext('2d');
+                const w = chartCanvas.width;
+                const h = chartCanvas.height;
+
+                ctx.clearRect(0, 0, w, h);
+
+                if (chartType === 'pie') {
+                    drawPieChart(ctx, data, total);
+                } else {
+                    drawBarChart(ctx, data, total);
+                }
+
+                chartDataUrl = chartCanvas.toDataURL('image/png');
+            }
+
+            function drawPieChart(ctx, data, total) {
+                const w = chartCanvas.width;
+                const h = chartCanvas.height;
+                const radius = Math.min(w, h) / 2 - 20;
+                const cx = w / 2;
+                const cy = h / 2;
+
+                let startAngle = -Math.PI / 2;
+                const legendItems = [];
+
+                data.forEach((d, i) => {
+                    const angle = (d.value / total) * 2 * Math.PI;
+                    const endAngle = startAngle + angle;
+
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.arc(cx, cy, radius, startAngle, endAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = d.color;
+                    ctx.fill();
+
+                    const midAngle = startAngle + angle / 2;
+                    const handleRadius = radius + 12;
+                    const hx = cx + Math.cos(midAngle) * handleRadius;
+                    const hy = cy + Math.sin(midAngle) * handleRadius;
+                    ctx.beginPath();
+                    ctx.arc(hx, hy, 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = chartLocked ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.3)';
+                    ctx.fill();
+                    ctx.strokeStyle = chartLocked ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    const labelRadius = radius * 0.65;
+                    const lx = cx + Math.cos(midAngle) * labelRadius;
+                    const ly = cy + Math.sin(midAngle) * labelRadius;
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 13px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    const percent = ((d.value / total) * 100).toFixed(1);
+                    if (angle > 0.3) {
+                        ctx.fillText(percent + '%', lx, ly);
+                    }
+
+                    legendItems.push({ name: d.name, value: d.value, percent: percent, color: d.color });
+                    startAngle = endAngle;
+                });
+
+                chartLegend.innerHTML = legendItems.map(item =>
+                    `<span class="legend-item">
+                        <span class="color-box" style="background:${item.color}"></span>
+                        ${item.name}: ${item.percent}% (${item.value})
+                    </span>`
+                ).join('');
+                chartLegendData = legendItems;
+            }
+
+            function drawBarChart(ctx, data, total) {
+                const w = chartCanvas.width;
+                const h = chartCanvas.height;
+                const padding = 40;
+                const chartW = w - padding * 2;
+                const chartH = h - padding * 2;
+                const barWidth = Math.min(chartW / data.length * 0.6, 50);
+                const gap = (chartW - barWidth * data.length) / (data.length + 1);
+                const maxVal = Math.max(...data.map(d => d.value), 1);
+
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(padding, padding);
+                ctx.lineTo(padding, h - padding);
+                ctx.lineTo(w - padding, h - padding);
+                ctx.stroke();
+
+                for (let i = 0; i <= 4; i++) {
+                    const val = (maxVal / 4) * i;
+                    const y = h - padding - (val / maxVal) * chartH;
+                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    ctx.font = '10px sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(Math.round(val), padding - 5, y);
+                }
+
+                const legendItems = [];
+
+                data.forEach((d, i) => {
+                    const x = padding + gap + i * (barWidth + gap);
+                    const barH = (d.value / maxVal) * chartH;
+                    const y = h - padding - barH;
+
+                    const grad = ctx.createLinearGradient(x, y, x, h - padding);
+                    grad.addColorStop(0, d.color);
+                    grad.addColorStop(1, d.color + '88');
+                    ctx.fillStyle = grad;
+                    ctx.shadowColor = d.color + '44';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    const r = 4;
+                    ctx.moveTo(x + r, y);
+                    ctx.lineTo(x + barWidth - r, y);
+                    ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + r);
+                    ctx.lineTo(x + barWidth, h - padding - r);
+                    ctx.quadraticCurveTo(x + barWidth, h - padding, x + barWidth - r, h - padding);
+                    ctx.lineTo(x + r, h - padding);
+                    ctx.quadraticCurveTo(x, h - padding, x, h - padding - r);
+                    ctx.lineTo(x, y + r);
+                    ctx.quadraticCurveTo(x, y, x + r, y);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(Math.round(d.value), x + barWidth / 2, y - 4);
+
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.font = '9px sans-serif';
+                    ctx.textBaseline = 'top';
+                    const label = d.name.length > 8 ? d.name.slice(0, 6) + '…' : d.name;
+                    ctx.fillText(label, x + barWidth / 2, h - padding + 4);
+
+                    legendItems.push({ name: d.name, value: d.value, color: d.color });
+                });
+
+                chartLegend.innerHTML = legendItems.map(item =>
+                    `<span class="legend-item">
+                        <span class="color-box" style="background:${item.color}"></span>
+                        ${item.name}: ${item.value}
+                    </span>`
+                ).join('');
+                chartLegendData = legendItems;
+            }
+
+            function addChartRow() {
+                const row = document.createElement('div');
+                row.className = 'chart-row';
+                row.innerHTML = `
+                    <input type="text" placeholder="Название" value="Доля ${chartRows.children.length + 1}">
+                    <input type="number" placeholder="%" value="10" min="1" max="100">
+                    <input type="color" value="#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}">
+                    <button class="remove-chart-row">✕</button>
+                `;
+                chartRows.appendChild(row);
+                row.querySelector('.remove-chart-row').addEventListener('click', function() {
+                    if (chartRows.children.length > 1) {
+                        row.remove();
+                        drawChart();
+                    } else {
+                        alert('Должна быть хотя бы одна доля');
+                    }
+                });
+                row.querySelectorAll('input').forEach(inp => {
+                    inp.addEventListener('input', drawChart);
+                });
+                drawChart();
+            }
+
+            // ---------- ПОЛНЫЙ ЭКРАН ----------
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        alert('Не удалось включить полноэкранный режим');
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            // ---------- ПРОСМОТР ЗАМЕТКИ ----------
+            function openViewModal(index) {
+                const note = notes[index];
+                if (!note) return;
+                viewNoteIndex = index;
+                isViewOpen = true;
+                viewTitle.textContent = note.title || 'Заметка';
+
+                let html = '';
+                if (note.text) {
+                    html += `<div class="view-text">${note.text}</div>`;
+                }
+                if (note.image) {
+                    html += `<img src="${note.image}" class="view-image" alt="Фото" />`;
+                }
+                if (note.chart) {
+                    html += `<img src="${note.chart}" class="view-chart" alt="Диаграмма" />`;
+                    if (note.legend && note.legend.length > 0) {
+                        html += `<div class="view-legend">`;
+                        note.legend.forEach(item => {
+                            html += `<div class="legend-item">
+                                <span class="color-box" style="background:${item.color}"></span>
+                                ${item.name}: ${item.percent || item.value}${item.percent ? '%' : ''} (${item.value})
+                            </div>`;
+                        });
+                        html += `</div>`;
+                    }
+                }
+                if (!note.text && !note.image && !note.chart) {
+                    html += '<div class="view-text" style="color:rgba(255,255,255,0.3);">Пустая заметка</div>';
+                }
+
+                viewBody.innerHTML = html;
+                viewModalOverlay.classList.add('active');
+            }
+
+            function closeViewModal() {
+                viewModalOverlay.classList.remove('active');
+                isViewOpen = false;
+                viewNoteIndex = -1;
+            }
+
+            function editFromView() {
+                const index = viewNoteIndex;
+                if (index < 0 || index >= notes.length) return;
+                closeViewModal();
+                openEditModal(index);
+            }
+
+            // ---------- МОДАЛКА ----------
+            function openModal(title = 'Новая заметка', note = null) {
+                if (isLocked) return;
+                isModalOpen = true;
+                modalTitle.textContent = title;
+                modalOverlay.classList.add('active');
+
+                markerMode = false;
+                markerToggle.classList.remove('active');
+                markerSection.classList.remove('active');
+                markerData = null;
+                if (isMarkerFullscreen) {
+                    exitMarkerFullscreen();
+                }
+                isMarkerFullscreen = false;
+                expandMarkerBtn.textContent = '⛶ Полноэкранный режим';
+                fullscreenControls.style.display = 'none';
+                markerCanvasWrap.classList.remove('fullscreen-canvas');
+
+                photoMode = false;
+                photoToggle.classList.remove('active');
+                photoSection.classList.remove('active');
+                photoData = null;
+                photoPreview.style.display = 'none';
+                photoPreview.src = '';
+                photoUrlInput.value = '';
+
+                chartMode = false;
+                chartToggle.classList.remove('active');
+                chartSection.classList.remove('active');
+                chartLocked = false;
+                chartLockToggle.classList.remove('active');
+                chartDataUrl = null;
+                chartType = 'pie';
+                chartTabs.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.chart === 'pie');
+                });
+                document.getElementById('chartSubtitle').textContent = '📊 Круговая диаграмма';
+
+                if (note) {
+                    noteTitleInput.value = note.title || '';
+                    noteContentInput.value = note.text || '';
+                } else {
+                    noteTitleInput.value = '';
+                    noteContentInput.value = '';
+                }
+
+                chartRows.innerHTML = `
+                    <div class="chart-row">
+                        <input type="text" placeholder="Название" value="Доля 1">
+                        <input type="number" placeholder="%" value="50" min="1" max="100">
+                        <input type="color" value="#ff8c00">
+                        <button class="remove-chart-row">✕</button>
+                    </div>
+                    <div class="chart-row">
+                        <input type="text" placeholder="Название" value="Доля 2">
+                        <input type="number" placeholder="%" value="30" min="1" max="100">
+                        <input type="color" value="#4facfe">
+                        <button class="remove-chart-row">✕</button>
+                    </div>
+                    <div class="chart-row">
+                        <input type="text" placeholder="Название" value="Доля 3">
+                        <input type="number" placeholder="%" value="20" min="1" max="100">
+                        <input type="color" value="#34d399">
+                        <button class="remove-chart-row">✕</button>
+                    </div>
+                `;
+                document.querySelectorAll('.chart-row .remove-chart-row').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const row = this.closest('.chart-row');
+                        if (chartRows.children.length > 1) {
+                            row.remove();
+                            drawChart();
+                        } else {
+                            alert('Должна быть хотя бы одна доля');
+                        }
+                    });
+                });
+                document.querySelectorAll('.chart-row input').forEach(inp => {
+                    inp.addEventListener('input', drawChart);
+                });
+
+                setTimeout(() => noteTitleInput.focus(), 100);
+            }
+
+            function openNewModal() {
+                if (isModalOpen || isLocked) return;
+                editingIndex = -1;
+                openModal('Новая заметка', null);
+            }
+
+            function openEditModal(index) {
+                if (isModalOpen || isLocked) return;
+                editingIndex = index;
+                const note = notes[index];
+                openModal('Редактировать заметку', note);
+            }
+
+            function closeModal() {
+                if (!isModalOpen) return;
+                const title = noteTitleInput.value;
+                const text = noteContentInput.value;
+                const hasChanges = title.trim() || text.trim() || markerData || photoData || chartDataUrl;
+                if (hasChanges && editingIndex === -1) {
+                    if (!confirm('У вас есть несохранённые изменения. Выйти?')) {
+                        return;
+                    }
+                } else if (hasChanges && editingIndex >= 0) {
+                    const original = notes[editingIndex];
+                    const hasRealChanges =
+                        title !== (original.title || '') ||
+                        text !== (original.text || '') ||
+                        (photoData !== (original.image || null)) ||
+                        (chartDataUrl !== (original.chart || null));
+                    if (hasRealChanges) {
+                        if (!confirm('У вас есть несохранённые изменения. Выйти?')) {
+                            return;
+                        }
+                    }
+                }
+                modalOverlay.classList.remove('active');
+                markerSection.classList.remove('active');
+                markerToggle.classList.remove('active');
+                markerMode = false;
+                if (isMarkerFullscreen) {
+                    exitMarkerFullscreen();
+                }
+                photoSection.classList.remove('active');
+                photoToggle.classList.remove('active');
+                photoMode = false;
+                chartSection.classList.remove('active');
+                chartToggle.classList.remove('active');
+                chartMode = false;
+                chartLocked = false;
+                chartLockToggle.classList.remove('active');
+                editingIndex = -1;
+                isModalOpen = false;
+            }
+
+            function saveNote() {
+                if (isLocked) return;
+                const title = noteTitleInput.value;
+                const text = noteContentInput.value;
+                const image = photoData || null;
+                const chart = chartDataUrl || null;
+                const legend = chartLegendData.length > 0 ? chartLegendData : null;
+
+                if (!title.trim() && !text.trim() && !image && !chart) {
+                    alert('Заполните хотя бы одно поле');
+                    return;
+                }
+
+                if (editingIndex >= 0 && editingIndex < notes.length) {
+                    updateNote(editingIndex, title, text, image, chart, legend);
+                } else {
+                    addNote(title, text, image, chart, legend);
+                }
+                modalOverlay.classList.remove('active');
+                isModalOpen = false;
+                editingIndex = -1;
+            }
+
+            // ---------- ОБРАБОТЧИКИ ----------
+            fabBtn.addEventListener('click', openNewModal);
+
+            modalCancel.addEventListener('click', closeModal);
+            modalSave.addEventListener('click', saveNote);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            viewCloseBtn.addEventListener('click', closeViewModal);
+            viewEditBtn.addEventListener('click', editFromView);
+            viewModalOverlay.addEventListener('click', (e) => {
+                if (e.target === viewModalOverlay) closeViewModal();
+            });
+
+            markerToggle.addEventListener('click', toggleMarker);
+            clearMarkerBtn.addEventListener('click', clearMarker);
+            recognizeBtn.addEventListener('click', recognizeText);
+            expandMarkerBtn.addEventListener('click', function() {
+                if (isMarkerFullscreen) {
+                    exitMarkerFullscreen();
+                } else {
+                    enterMarkerFullscreen();
+                }
+            });
+            fsExitBtn.addEventListener('click', exitMarkerFullscreen);
+            markerColorInput.addEventListener('input', function() {
+                markerColor = this.value;
+            });
+
+            photoToggle.addEventListener('click', togglePhoto);
+            photoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    photoData = e.target.result;
+                    photoPreview.src = photoData;
+                    photoPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+            photoLoadBtn.addEventListener('click', function() {
+                const url = photoUrlInput.value.trim();
+                if (url) loadPhotoFromUrl(url);
+            });
+            photoUrlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') photoLoadBtn.click();
+            });
+
+            chartToggle.addEventListener('click', toggleChart);
+            addChartRowBtn.addEventListener('click', addChartRow);
+            chartLockToggle.addEventListener('click', toggleChartLock);
+            chartTabs.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    switchChartType(this.dataset.chart);
+                });
+            });
+
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+            function toggleSidebar() {
+                if (isLocked) return;
+                sidebar.classList.toggle('open');
+                sidebarOverlay.classList.toggle('active');
+            }
+
+            menuBtn.addEventListener('click', toggleSidebar);
+            closeMenuBtn.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+
+            themeToggle.addEventListener('click', toggleTheme);
+
+            clearAllBtn.addEventListener('click', clearAllNotes);
+
+            bgOptions.addEventListener('click', (e) => {
+                if (isLocked) return;
+                const btn = e.target.closest('.bg-btn');
+                if (!btn) return;
+                if (btn.dataset.bg === 'custom') {
+                    customBgInput.click();
+                    return;
+                }
+                currentBg = btn.dataset.bg;
+                applyBg();
+            });
+
+            customBgInput.addEventListener('change', function() {
+                if (isLocked) return;
+                const file = this.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    customBg = e.target.result;
+                    currentBg = 'custom';
+                    applyBg();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Пароль
+            passwordSetBtn.addEventListener('click', function() {
+                const pwd = passwordInput.value.trim();
+                if (pwd.length < 4) {
+                    alert('Пароль должен быть не менее 4 символов');
+                    return;
+                }
+                savePassword(pwd);
+                passwordInput.value = '';
+            });
+
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') passwordSetBtn.click();
+            });
+
+            lockUnlockBtn.addEventListener('click', function() {
+                const pwd = lockInput.value;
+                if (unlockApp(pwd)) {
+                    lockInput.value = '';
+                }
+            });
+
+            lockInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') lockUnlockBtn.click();
+            });
+
+            lockResetBtn.addEventListener('click', function() {
+                showRecovery();
+            });
+
+            recoveryConfirmBtn.addEventListener('click', performRecovery);
+            recoveryCancelBtn.addEventListener('click', hideRecovery);
+
+            // Перенос данных
+            transferRow.addEventListener('click', showTransfer);
+            transferCloseBtn.addEventListener('click', hideTransfer);
+            transferInstructionsBtn.addEventListener('click', toggleInstructions);
+            transferDownloadBtn.addEventListener('click', function() {
+                if (password) {
+                    passwordDialog.classList.add('active');
+                    dialogPasswordInput.value = '';
+                    dialogError.textContent = '';
+                    dialogPasswordInput.focus();
+                } else {
+                    exportDataNoPassword();
+                }
+            });
+
+            function exportDataNoPassword() {
+                const data = {
+                    notes: notes,
+                    theme: currentTheme,
+                    bg: currentBg,
+                    customBg: customBg,
+                    password: '',
+                    version: '1.0'
+                };
+                const json = JSON.stringify(data);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'notes_backup.nextnotes';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 5000);
+                showToast('✅ Данные экспортированы');
+                hideTransfer();
+            }
+
+            dialogConfirmBtn.addEventListener('click', function() {
+                if (password) {
+                    const pwd = dialogPasswordInput.value;
+                    if (pwd !== password) {
+                        dialogError.textContent = '❌ Неверный пароль';
+                        return;
+                    }
+                    dialogError.textContent = '';
+                    dialogPasswordInput.value = '';
+                    passwordDialog.classList.remove('active');
+                    exportDataNoPassword();
+                } else {
+                    passwordDialog.classList.remove('active');
+                    exportDataNoPassword();
+                }
+            });
+
+            dialogCancelBtn.addEventListener('click', function() {
+                passwordDialog.classList.remove('active');
+                dialogPasswordInput.value = '';
+                dialogError.textContent = '';
+            });
+
+            dialogPasswordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') dialogConfirmBtn.click();
+            });
+
+            transferUploadBtn.addEventListener('click', importData);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (sidebar.classList.contains('open')) toggleSidebar();
+                    if (modalOverlay.classList.contains('active')) closeModal();
+                    if (isViewOpen) closeViewModal();
+                    if (isMarkerFullscreen) exitMarkerFullscreen();
+                    if (recoveryOverlay.classList.contains('active')) hideRecovery();
+                    if (transferOverlay.classList.contains('active')) hideTransfer();
+                    if (passwordDialog.classList.contains('active')) {
+                        passwordDialog.classList.remove('active');
+                        dialogPasswordInput.value = '';
+                        dialogError.textContent = '';
+                    }
+                }
+            });
+
+            let inactivityTimer = null;
+
+            function resetInactivityTimer() {
+                clearTimeout(inactivityTimer);
+                if (password && !isLocked) {
+                    inactivityTimer = setTimeout(() => {
+                        lockApp();
+                    }, 300000);
+                }
+            }
+
+            document.addEventListener('click', resetInactivityTimer);
+            document.addEventListener('keydown', resetInactivityTimer);
+            document.addEventListener('touchstart', resetInactivityTimer);
+
+            // ---------- СТАРТ ----------
+            loadData();
+            console.log('📝 Заметки запущены');
+            resetInactivityTimer();
+        })();
+    </script>
+</body>
+</html>
