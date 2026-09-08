@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Заметки</title>
+    <title>ТГЗаметки</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
     </script>
     <style>
@@ -727,15 +727,15 @@
             color: rgba(0, 0, 0, 0.4);
         }
 
-        /* ---------- ВЕРХНЯЯ ПАНЕЛЬ (УВЕЛИЧЕННАЯ) ---------- */
+        /* ---------- ВЕРХНЯЯ ПАНЕЛЬ — РАСШИРЕННАЯ И ОПУЩЕННАЯ ---------- */
         .top-bar {
             position: relative;
             z-index: 10;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 20px 16px;
-            margin-top: 6px;
+            padding: 22px 20px 18px;
+            margin-top: 12px;
             background: transparent;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -743,7 +743,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
             flex-shrink: 0;
             transition: background 0.4s ease;
-            min-height: 64px;
+            min-height: 76px;
         }
 
         body.light .top-bar {
@@ -776,8 +776,8 @@
 
         .top-bar .title {
             color: #fff;
-            font-size: 1.3rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            font-weight: 700;
             letter-spacing: 0.5px;
             transition: color 0.4s ease;
         }
@@ -813,8 +813,6 @@
         body.light .content::-webkit-scrollbar-thumb {
             background: rgba(0, 0, 0, 0.12);
         }
-
-        /* ---------- НЕТ НИЖНЕЙ ПОЛОСЫ ---------- */
 
         /* ---------- ПУСТОЕ СОСТОЯНИЕ ---------- */
         .empty-state {
@@ -2295,12 +2293,12 @@
                 padding: 8px 16px;
             }
             .top-bar {
-                padding: 16px 16px 14px;
-                min-height: 60px;
-                margin-top: 4px;
+                padding: 18px 16px 16px;
+                min-height: 68px;
+                margin-top: 8px;
             }
             .top-bar .title {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
             }
             .lock-screen .lock-title {
                 font-size: 1.2rem;
@@ -2337,7 +2335,7 @@
 
         <div class="lock-screen" id="lockScreen">
             <div class="lock-icon">🔒</div>
-            <div class="lock-title">Заметки</div>
+            <div class="lock-title">ТГЗаметки</div>
             <div class="lock-subtitle">Введите пароль для входа</div>
             <div class="lock-input-wrap">
                 <input type="password" class="lock-input" id="lockInput" placeholder="••••••" maxlength="20">
@@ -2414,12 +2412,12 @@
             </div>
         </div>
 
-        <!-- ВЕРХНЯЯ ПАНЕЛЬ — УВЕЛИЧЕННАЯ И ОПУЩЕННАЯ -->
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ — РАСШИРЕННАЯ И ОПУЩЕННАЯ -->
         <div class="top-bar">
             <button class="menu-btn" id="menuBtn">
                 <span></span><span></span><span></span>
             </button>
-            <div class="title">Заметки</div>
+            <div class="title">ТГЗаметки</div>
             <div class="spacer"></div>
         </div>
 
@@ -2431,8 +2429,6 @@
             </div>
             <div class="notes-grid" id="notesContainer"></div>
         </div>
-
-        <!-- НЕТ НИЖНЕЙ ПОЛОСЫ -->
 
         <button class="fab" id="fabBtn">+</button>
 
@@ -3035,15 +3031,12 @@
                     card.className = 'note-card';
                     card.dataset.index = realIndex;
 
-                    // Обработка клика для открытия заметки
                     card.addEventListener('click', function(e) {
-                        // Если клик по кнопке удаления — не открываем
                         if (e.target.closest('.card-actions')) return;
                         if (isLocked) return;
                         openViewModal(realIndex);
                     });
 
-                    // Долгое нажатие для удаления
                     card.addEventListener('pointerdown', function(e) {
                         if (isLocked) return;
                         if (e.target.closest('.card-actions')) return;
@@ -4270,7 +4263,7 @@
 
             // ---------- СТАРТ ----------
             loadData();
-            console.log('📝 Заметки запущены');
+            console.log('📝 ТГЗаметки запущены');
             resetInactivityTimer();
         })();
     </script>
