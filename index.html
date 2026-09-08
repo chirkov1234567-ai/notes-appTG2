@@ -7,10 +7,46 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
     </script>
     <style>
+        /* ---------- ГЛОБАЛЬНЫЙ СБРОС ---------- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent !important;
+            outline: none !important;
+        }
+
+        *:focus,
+        *:active,
+        *:visited {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        /* Убираем синюю обводку на всех элементах */
+        input:focus,
+        textarea:focus,
+        button:focus,
+        div:focus,
+        canvas:focus,
+        .note-card:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        /* Убираем выделение текста */
+        .note-card,
+        button,
+        .btn,
+        .toggle-switch,
+        .sidebar .menu-item,
+        .bg-options .bg-btn,
+        .fullscreen-btn,
+        .transfer-row {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
 
         body {
@@ -22,6 +58,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light {
@@ -68,6 +105,7 @@
             background-repeat: no-repeat !important;
         }
 
+        /* ---------- БЛОКИРОВКА ---------- */
         .lock-screen {
             position: absolute;
             inset: 0;
@@ -223,6 +261,7 @@
             text-align: center;
         }
 
+        /* ---------- ВОССТАНОВЛЕНИЕ ---------- */
         .recovery-overlay {
             position: absolute;
             inset: 0;
@@ -350,6 +389,7 @@
             background: rgba(0, 0, 0, 0.08);
         }
 
+        /* ---------- ПЕРЕНОС ДАННЫХ ---------- */
         .transfer-overlay {
             position: absolute;
             inset: 0;
@@ -576,6 +616,7 @@
             background: rgba(0, 0, 0, 0.02);
         }
 
+        /* ---------- ПАРОЛЬНОЕ ОКНО ---------- */
         .password-dialog {
             display: none;
             position: absolute;
@@ -689,6 +730,7 @@
             color: rgba(0, 0, 0, 0.4);
         }
 
+        /* ---------- ВЕРХНЯЯ ПАНЕЛЬ ---------- */
         .top-bar {
             position: relative;
             z-index: 10;
@@ -749,10 +791,11 @@
             width: 38px;
         }
 
+        /* ---------- ОСНОВНОЙ КОНТЕНТ ---------- */
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 14px 90px;
+            padding: 12px 14px 0px;
             position: relative;
             z-index: 5;
             scroll-behavior: smooth;
@@ -772,6 +815,26 @@
             background: rgba(0, 0, 0, 0.12);
         }
 
+        /* ---------- НИЖНИЙ БАМПЕР (для Telegram) ---------- */
+        .bottom-bumper {
+            height: 70px;
+            min-height: 70px;
+            flex-shrink: 0;
+            background: transparent;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(10, 10, 10, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            position: relative;
+            z-index: 5;
+        }
+
+        body.light .bottom-bumper {
+            background: rgba(245, 240, 235, 0.3);
+            border-top: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        /* ---------- ПУСТОЕ СОСТОЯНИЕ ---------- */
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -811,10 +874,12 @@
             opacity: 0.5;
         }
 
+        /* ---------- СЕТКА ЗАМЕТОК ---------- */
         .notes-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 8px;
+            padding-bottom: 8px;
         }
 
         .note-card {
@@ -836,6 +901,7 @@
             user-select: none;
             -webkit-user-select: none;
             touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .note-card .card-actions {
@@ -867,6 +933,8 @@
             align-items: center;
             justify-content: center;
             transition: 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .note-card .card-actions button {
@@ -874,9 +942,10 @@
             color: rgba(0, 0, 0, 0.5);
         }
 
-        .note-card .card-actions button:hover {
-            background: rgba(231, 76, 60, 0.4);
-            color: #fff;
+        .note-card .card-actions button:focus,
+        .note-card .card-actions button:active {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .note-card .card-actions .btn-delete:hover {
@@ -888,6 +957,12 @@
             background: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(0, 0, 0, 0.05);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .note-card:focus,
+        .note-card:active {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .note-card:hover {
@@ -957,6 +1032,8 @@
             transition: 0.2s;
             z-index: 2;
             position: relative;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .note-card .note-meta .delete-btn {
@@ -977,9 +1054,10 @@
             color: #ff8c00;
         }
 
+        /* ---------- КНОПКА ПЛЮС ---------- */
         .fab {
             position: absolute;
-            bottom: 28px;
+            bottom: 88px;
             right: 18px;
             z-index: 20;
             width: 56px;
@@ -996,6 +1074,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        .fab:focus,
+        .fab:active {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .fab {
@@ -1010,6 +1096,7 @@
             transform: scale(0.92);
         }
 
+        /* ---------- МОДАЛКА ---------- */
         .modal-overlay {
             position: absolute;
             inset: 0;
@@ -1085,6 +1172,7 @@
             margin-bottom: 10px;
             transition: 0.2s;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .modal-content input[type="text"] {
@@ -1095,6 +1183,8 @@
 
         .modal-content input[type="text"]:focus {
             border-color: #ff8c00;
+            outline: none;
+            box-shadow: none;
         }
 
         .modal-content textarea {
@@ -1110,6 +1200,7 @@
             resize: vertical;
             outline: none;
             transition: 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .modal-content textarea {
@@ -1120,6 +1211,8 @@
 
         .modal-content textarea:focus {
             border-color: #ff8c00;
+            outline: none;
+            box-shadow: none;
         }
 
         .toggle-switch {
@@ -1130,6 +1223,7 @@
             padding: 6px 12px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.03);
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .toggle-switch {
@@ -1154,6 +1248,7 @@
             position: relative;
             transition: 0.3s;
             flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .toggle-switch .toggle-track {
@@ -1224,6 +1319,8 @@
             font-size: 0.75rem;
             transition: 0.2s;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .marker-section .marker-tools button {
@@ -1256,6 +1353,8 @@
             cursor: pointer;
             padding: 0;
             background: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .marker-section .marker-tools .color-picker input[type="color"] {
@@ -1277,59 +1376,12 @@
             border-radius: 6px;
             background: rgba(0, 0, 0, 0.1);
             min-height: 160px;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .marker-section .marker-canvas-wrap canvas {
             background: rgba(0, 0, 0, 0.04);
-        }
-
-        .marker-section .marker-canvas-wrap.fullscreen-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0;
-            margin: 0;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        .marker-section .marker-canvas-wrap.fullscreen-canvas canvas {
-            width: 90vw;
-            height: auto;
-            aspect-ratio: 16 / 9;
-            max-height: 80vh;
-            min-height: 300px;
-        }
-
-        .marker-section .marker-canvas-wrap.fullscreen-canvas .fullscreen-controls {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .marker-section .marker-canvas-wrap.fullscreen-canvas .fullscreen-controls button {
-            padding: 10px 28px;
-            border: none;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            cursor: pointer;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: 0.2s;
-        }
-
-        .marker-section .marker-canvas-wrap.fullscreen-canvas .fullscreen-controls button:hover {
-            background: rgba(255, 255, 255, 0.2);
         }
 
         .marker-section .marker-actions {
@@ -1354,6 +1406,8 @@
             font-size: 0.75rem;
             transition: 0.2s;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .marker-section .marker-actions button {
@@ -1418,6 +1472,8 @@
             transition: 0.2s;
             font-family: inherit;
             white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .photo-section .photo-upload-wrap label {
@@ -1446,6 +1502,7 @@
             font-size: 0.85rem;
             outline: none;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .photo-section .photo-upload-wrap .photo-url-input {
@@ -1456,6 +1513,8 @@
 
         .photo-section .photo-upload-wrap .photo-url-input:focus {
             border-color: #ff8c00;
+            outline: none;
+            box-shadow: none;
         }
 
         .photo-section .photo-upload-wrap .photo-load-btn {
@@ -1469,6 +1528,8 @@
             transition: 0.2s;
             font-family: inherit;
             white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .photo-section .photo-upload-wrap .photo-load-btn:hover {
@@ -1518,6 +1579,8 @@
             font-size: 0.75rem;
             transition: 0.2s;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .chart-section .chart-tabs button {
@@ -1562,6 +1625,7 @@
             font-size: 0.8rem;
             outline: none;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .chart-section .chart-row input {
@@ -1572,6 +1636,8 @@
 
         .chart-section .chart-row input:focus {
             border-color: #ff8c00;
+            outline: none;
+            box-shadow: none;
         }
 
         .chart-section .chart-row input[type="number"] {
@@ -1588,6 +1654,8 @@
             cursor: pointer;
             background: none;
             flex: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .chart-section .chart-row input[type="color"] {
@@ -1604,6 +1672,8 @@
             font-size: 0.7rem;
             transition: 0.2s;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .chart-section .chart-row button {
@@ -1629,6 +1699,8 @@
             border-radius: 8px;
             cursor: pointer;
             touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .chart-section .chart-legend {
@@ -1694,6 +1766,7 @@
             position: relative;
             transition: 0.3s;
             flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .chart-section .chart-lock .toggle-track {
@@ -1736,6 +1809,8 @@
             cursor: pointer;
             transition: 0.2s;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .modal-actions .btn-save {
@@ -1857,6 +1932,7 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* ---------- САЙДБАР ---------- */
         .sidebar {
             position: absolute;
             top: 0;
@@ -1915,6 +1991,8 @@
             font-size: 1.4rem;
             cursor: pointer;
             font-weight: 300;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .sidebar .sidebar-header .close-menu {
@@ -1937,6 +2015,8 @@
             font-family: inherit;
             text-align: left;
             font-weight: 400;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body.light .sidebar .menu-item {
@@ -1993,6 +2073,7 @@
             cursor: pointer;
             position: relative;
             transition: 0.3s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .sidebar .theme-toggle .toggle-track {
@@ -2035,6 +2116,8 @@
             background-size: cover;
             background-position: center;
             background: rgba(255, 255, 255, 0.05);
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .sidebar .bg-options .bg-btn:hover {
@@ -2094,6 +2177,7 @@
             font-size: 0.85rem;
             outline: none;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.light .sidebar .password-section input[type="password"],
@@ -2105,6 +2189,8 @@
 
         .sidebar .password-section input:focus {
             border-color: #ff8c00;
+            outline: none;
+            box-shadow: none;
         }
 
         .sidebar .password-section .password-btn {
@@ -2118,6 +2204,8 @@
             transition: 0.2s;
             font-family: inherit;
             white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .sidebar .password-section .password-btn:hover {
@@ -2146,6 +2234,8 @@
             cursor: pointer;
             border-radius: 8px;
             transition: 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .sidebar .transfer-section .transfer-row:hover {
@@ -2174,23 +2264,7 @@
             color: rgba(0, 0, 0, 0.1);
         }
 
-        .fullscreen-btn {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 140, 0, 0.1);
-            color: #ff8c00;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-family: inherit;
-            width: 100%;
-            text-align: left;
-        }
-
-        .fullscreen-btn:hover {
-            background: rgba(255, 140, 0, 0.2);
-        }
-
+        /* ---------- САЙДБАР ОВЕРЛЕЙ ---------- */
         .sidebar-overlay {
             position: absolute;
             inset: 0;
@@ -2205,9 +2279,10 @@
             display: block;
         }
 
+        /* ---------- АДАПТИВ ---------- */
         @media (max-width: 480px) {
             .content {
-                padding: 10px 12px 80px;
+                padding: 10px 12px 0px;
             }
             .notes-grid {
                 gap: 6px;
@@ -2221,7 +2296,7 @@
                 width: 50px;
                 height: 50px;
                 font-size: 1.8rem;
-                bottom: 22px;
+                bottom: 82px;
                 right: 14px;
             }
             .modal-content {
@@ -2236,6 +2311,10 @@
                 bottom: 80px;
                 font-size: 0.75rem;
                 padding: 8px 16px;
+            }
+            .bottom-bumper {
+                height: 60px;
+                min-height: 60px;
             }
             .lock-screen .lock-title {
                 font-size: 1.2rem;
@@ -2366,6 +2445,9 @@
             <div class="notes-grid" id="notesContainer"></div>
         </div>
 
+        <!-- НИЖНИЙ БАМПЕР ДЛЯ TELEGRAM -->
+        <div class="bottom-bumper"></div>
+
         <button class="fab" id="fabBtn">+</button>
 
         <div class="modal-overlay" id="modalOverlay">
@@ -2385,16 +2467,12 @@
                     <div class="marker-tools">
                         <button id="clearMarkerBtn">🗑️ Очистить</button>
                         <button id="recognizeBtn">🔍 Распознать</button>
-                        <button id="expandMarkerBtn">⛶ Полноэкранный режим</button>
                         <div class="color-picker">
                             <input type="color" id="markerColor" value="#ff8c00">
                         </div>
                     </div>
                     <div class="marker-canvas-wrap" id="markerCanvasWrap">
                         <canvas id="markerCanvas" width="800" height="450"></canvas>
-                        <div class="fullscreen-controls" id="fullscreenControls" style="display:none;">
-                            <button id="fsExitBtn">✕ Выйти</button>
-                        </div>
                     </div>
                     <div class="marker-actions">
                         <span class="recognize-status" id="recognizeStatus">Нарисуйте текст и нажмите "Распознать"</span>
@@ -2493,8 +2571,6 @@
                 <button class="close-menu" id="closeMenuBtn">✕</button>
             </div>
 
-            <button class="fullscreen-btn" id="fullscreenBtn">⛶ Полноэкранный режим</button>
-
             <div class="theme-toggle">
                 <span id="themeLabel">Тёмная тема</span>
                 <div class="toggle-track" id="themeToggle">
@@ -2570,7 +2646,6 @@
             let isDrawing = false;
             let lastX = 0, lastY = 0;
             let markerData = null;
-            let isMarkerFullscreen = false;
 
             let photoMode = false;
             let photoData = null;
@@ -2604,7 +2679,6 @@
             const clearAllBtn = document.getElementById('clearAllBtn');
             const bgOptions = document.getElementById('bgOptions');
             const customBgInput = document.getElementById('customBgInput');
-            const fullscreenBtn = document.getElementById('fullscreenBtn');
             const toast = document.getElementById('toast');
 
             // Lock
@@ -2650,13 +2724,10 @@
             const markerSection = document.getElementById('markerSection');
             const clearMarkerBtn = document.getElementById('clearMarkerBtn');
             const recognizeBtn = document.getElementById('recognizeBtn');
-            const expandMarkerBtn = document.getElementById('expandMarkerBtn');
             const markerColorInput = document.getElementById('markerColor');
             const markerCanvas = document.getElementById('markerCanvas');
             const markerCanvasWrap = document.getElementById('markerCanvasWrap');
             const recognizeStatus = document.getElementById('recognizeStatus');
-            const fullscreenControls = document.getElementById('fullscreenControls');
-            const fsExitBtn = document.getElementById('fsExitBtn');
 
             const photoToggle = document.getElementById('photoToggle');
             const photoSection = document.getElementById('photoSection');
@@ -2804,7 +2875,6 @@
                 transferInstructions.classList.toggle('active');
             }
 
-            // Экспорт данных
             function exportData() {
                 const pwd = dialogPasswordInput.value;
                 if (pwd !== password) {
@@ -2839,7 +2909,6 @@
                 hideTransfer();
             }
 
-            // Импорт данных
             function importData() {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -2884,7 +2953,7 @@
             // ---------- ЗАГРУЗКА ----------
             function loadData() {
                 try {
-                    const saved = localStorage.getItem('notes_data_v12');
+                    const saved = localStorage.getItem('notes_data_v13');
                     if (saved) {
                         const data = JSON.parse(saved);
                         notes = data.notes || [];
@@ -2904,14 +2973,13 @@
                 renderNotes();
                 loadPassword();
 
-                setTimeout(() => {
-                    if (!localStorage.getItem('fullscreen_asked')) {
-                        if (confirm('Перейти в полноэкранный режим для удобства?')) {
-                            toggleFullscreen();
-                        }
-                        localStorage.setItem('fullscreen_asked', 'true');
-                    }
-                }, 1000);
+                // Проверяем, что приложение открыто в Telegram
+                if (window.Telegram && window.Telegram.WebApp) {
+                    // Уведомляем Telegram, что приложение готово
+                    window.Telegram.WebApp.ready();
+                    // Расширяем на весь экран
+                    window.Telegram.WebApp.expand();
+                }
             }
 
             function saveData() {
@@ -2922,7 +2990,7 @@
                         bg: currentBg,
                         customBg: customBg
                     };
-                    localStorage.setItem('notes_data_v12', JSON.stringify(data));
+                    localStorage.setItem('notes_data_v13', JSON.stringify(data));
                     console.log('💾 Сохранено заметок:', notes.length);
                 } catch (e) {
                     console.warn('Ошибка сохранения:', e);
@@ -3233,10 +3301,6 @@
                 if (markerMode) {
                     recognizeStatus.textContent = 'Нарисуйте текст и нажмите "Распознать"';
                     setTimeout(initMarkerCanvas, 50);
-                } else {
-                    if (isMarkerFullscreen) {
-                        exitMarkerFullscreen();
-                    }
                 }
             }
 
@@ -3252,40 +3316,6 @@
                     markerData = null;
                     recognizeStatus.textContent = 'Рисунок очищен';
                 }
-            }
-
-            function enterMarkerFullscreen() {
-                isMarkerFullscreen = true;
-                markerCanvasWrap.classList.add('fullscreen-canvas');
-                fullscreenControls.style.display = 'flex';
-                expandMarkerBtn.textContent = '⛶ Свернуть';
-                setTimeout(() => {
-                    const w = Math.min(window.innerWidth - 40, 1000);
-                    const h = w * (9 / 16);
-                    markerCanvas.width = w;
-                    markerCanvas.height = h;
-                    markerCanvas.style.width = w + 'px';
-                    markerCanvas.style.height = h + 'px';
-                    const ctx = markerCanvas.getContext('2d');
-                    ctx.fillStyle = currentTheme === 'dark' ? '#1a1a1a' : '#f0ebe6';
-                    ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);
-                    if (markerData) {
-                        const img = new Image();
-                        img.onload = function() {
-                            ctx.drawImage(img, 0, 0, markerCanvas.width, markerCanvas.height);
-                        };
-                        img.src = markerData;
-                    }
-                    setupMarkerEvents();
-                }, 50);
-            }
-
-            function exitMarkerFullscreen() {
-                isMarkerFullscreen = false;
-                markerCanvasWrap.classList.remove('fullscreen-canvas');
-                fullscreenControls.style.display = 'none';
-                expandMarkerBtn.textContent = '⛶ Полноэкранный режим';
-                setTimeout(initMarkerCanvas, 50);
             }
 
             // ---------- РАСПОЗНАВАНИЕ ----------
@@ -3828,17 +3858,6 @@
                 drawChart();
             }
 
-            // ---------- ПОЛНЫЙ ЭКРАН ----------
-            function toggleFullscreen() {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => {
-                        alert('Не удалось включить полноэкранный режим');
-                    });
-                } else {
-                    document.exitFullscreen();
-                }
-            }
-
             // ---------- ПРОСМОТР ЗАМЕТКИ ----------
             function openViewModal(index) {
                 const note = notes[index];
@@ -3899,13 +3918,6 @@
                 markerToggle.classList.remove('active');
                 markerSection.classList.remove('active');
                 markerData = null;
-                if (isMarkerFullscreen) {
-                    exitMarkerFullscreen();
-                }
-                isMarkerFullscreen = false;
-                expandMarkerBtn.textContent = '⛶ Полноэкранный режим';
-                fullscreenControls.style.display = 'none';
-                markerCanvasWrap.classList.remove('fullscreen-canvas');
 
                 photoMode = false;
                 photoToggle.classList.remove('active');
@@ -4012,9 +4024,6 @@
                 markerSection.classList.remove('active');
                 markerToggle.classList.remove('active');
                 markerMode = false;
-                if (isMarkerFullscreen) {
-                    exitMarkerFullscreen();
-                }
                 photoSection.classList.remove('active');
                 photoToggle.classList.remove('active');
                 photoMode = false;
@@ -4068,14 +4077,6 @@
             markerToggle.addEventListener('click', toggleMarker);
             clearMarkerBtn.addEventListener('click', clearMarker);
             recognizeBtn.addEventListener('click', recognizeText);
-            expandMarkerBtn.addEventListener('click', function() {
-                if (isMarkerFullscreen) {
-                    exitMarkerFullscreen();
-                } else {
-                    enterMarkerFullscreen();
-                }
-            });
-            fsExitBtn.addEventListener('click', exitMarkerFullscreen);
             markerColorInput.addEventListener('input', function() {
                 markerColor = this.value;
             });
@@ -4108,8 +4109,6 @@
                     switchChartType(this.dataset.chart);
                 });
             });
-
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
 
             function toggleSidebar() {
                 if (isLocked) return;
@@ -4255,7 +4254,6 @@
                     if (sidebar.classList.contains('open')) toggleSidebar();
                     if (modalOverlay.classList.contains('active')) closeModal();
                     if (isViewOpen) closeViewModal();
-                    if (isMarkerFullscreen) exitMarkerFullscreen();
                     if (recoveryOverlay.classList.contains('active')) hideRecovery();
                     if (transferOverlay.classList.contains('active')) hideTransfer();
                     if (passwordDialog.classList.contains('active')) {
