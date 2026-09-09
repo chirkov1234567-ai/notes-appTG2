@@ -386,6 +386,78 @@
             background: rgba(0, 0, 0, 0.08);
         }
 
+        /* ---------- ОКНО ОЖИДАНИЯ ПРИ ВОССТАНОВЛЕНИИ ---------- */
+        .waiting-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 112;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .waiting-overlay.active {
+            display: flex;
+        }
+
+        .waiting-window {
+            background: rgba(20, 20, 22, 0.92);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border-radius: 24px;
+            padding: 32px 28px 28px;
+            max-width: 360px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        body.light .waiting-window {
+            background: rgba(245, 240, 235, 0.92);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .waiting-window .waiting-icon {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+        }
+
+        .waiting-window .waiting-title {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        body.light .waiting-window .waiting-title {
+            color: #1a1a1a;
+        }
+
+        .waiting-window .waiting-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.08);
+            border-top-color: #ff8c00;
+            border-radius: 50%;
+            margin: 12px auto 0;
+            animation: spin 0.8s linear infinite;
+        }
+
+        body.light .waiting-window .waiting-spinner {
+            border-color: rgba(0, 0, 0, 0.08);
+            border-top-color: #ff8c00;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* ---------- ПЕРЕНОС ДАННЫХ ---------- */
         .transfer-overlay {
             position: absolute;
@@ -784,7 +856,7 @@
             color: rgba(255, 255, 255, 0.5);
             font-size: 0.95rem;
             line-height: 1.7;
-            margin-bottom: 18px;
+            margin-bottom: 12px;
         }
 
         body.light .support-window .support-text {
@@ -798,6 +870,30 @@
 
         body.light .support-window .support-text .highlight {
             color: rgba(0, 0, 0, 0.6);
+        }
+
+        .support-window .support-refund {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        body.light .support-window .support-refund {
+            color: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .support-window .support-refund a {
+            color: #ff8c00;
+            text-decoration: none;
+        }
+
+        .support-window .support-refund a:hover {
+            text-decoration: underline;
         }
 
         .support-window .support-actions {
@@ -2057,6 +2153,35 @@
             border-right: 1px solid rgba(0, 0, 0, 0.05);
         }
 
+        body.light .sidebar .sidebar-header h2,
+        body.light .sidebar .menu-item,
+        body.light .sidebar .theme-toggle span,
+        body.light .sidebar .password-section .password-status,
+        body.light .sidebar .transfer-section .transfer-row span,
+        body.light .sidebar .support-row span,
+        body.light .sidebar .bg-options .bg-btn.custom-bg,
+        body.light .sidebar .sidebar-header .close-menu {
+            color: #1a1a1a !important;
+        }
+
+        body.light .sidebar .theme-toggle .toggle-track {
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        body.light .sidebar .theme-toggle .toggle-track .toggle-thumb {
+            background: #1a1a1a;
+        }
+
+        body.light .sidebar .password-section input {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+        }
+
+        body.light .sidebar .divider {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
         .sidebar.open {
             left: 0;
         }
@@ -2253,11 +2378,6 @@
         .sidebar .bg-options .bg-btn[data-bg="blue"] { background: #0d1b2a; }
         .sidebar .bg-options .bg-btn[data-bg="green"] { background: #0f1a12; }
         .sidebar .bg-options .bg-btn[data-bg="purple"] { background: #1a0f1f; }
-        .sidebar .bg-options .bg-btn[data-bg="wallpaper"] {
-            background-image: url('https://s336vla.storage.yandex.net/rdisk/9f3afa99762b65812cfe291648695d8ea165cede8f3c967f4912856c7d0a4e3c/6aa0a6bc/r6qhP4JaNl-rfJM9Z_wyioP5tjDUFVMeIMLoD6mhLjGOEKeG9o4wNwCL_YAID7nzhAJS-6PHS3fEdxro0HxlIA==?uid=2346789452&filename=generated_image_e06ab1549d8b11f19fddea615d81a76c~2.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg&owner_uid=2346789452&fsize=187314&hid=0087fc85fd648a4be409dbcaba31b13b&media_type=image&tknv=v3&is_direct_zip_experiment=1&etag=9481030bfc206ff08b277cbd41729f20&ts=65b01d82a2700&s=6d2b982d81d420190be9b72d5efaebaee3a1625240f787d79b053d6367709998&pb=U2FsdGVkX1-jaujI0I34J1Xm96b1BNkMLH1ygs8hfa26zkAePdC-F8xJGIhUuYoGFll-75EoLkXhCUjkIyOK6eoEGiKVrSHpZM1nSo-dKwU');
-            background-size: cover;
-            background-position: center;
-        }
 
         .sidebar .password-section {
             margin-top: 6px;
@@ -2268,6 +2388,7 @@
             gap: 8px;
             align-items: center;
             flex-wrap: wrap;
+            margin-top: 4px;
         }
 
         .sidebar .password-section input[type="password"],
@@ -2315,6 +2436,25 @@
 
         .sidebar .password-section .password-btn:hover {
             background: rgba(255, 140, 0, 0.25);
+        }
+
+        .sidebar .password-section .password-btn-delete {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        .sidebar .password-section .password-btn-delete:hover {
+            background: rgba(231, 76, 60, 0.3);
         }
 
         .sidebar .password-section .password-status {
@@ -2482,6 +2622,18 @@
             .support-window {
                 padding: 24px 20px;
             }
+            .waiting-window {
+                padding: 24px 20px;
+            }
+            .sidebar .password-section .password-row {
+                flex-wrap: wrap;
+            }
+            .sidebar .password-section .password-btn,
+            .sidebar .password-section .password-btn-delete {
+                flex: 1;
+                text-align: center;
+                min-width: 80px;
+            }
         }
 
         @media (min-width: 600px) {
@@ -2519,11 +2671,36 @@
                 <div class="recovery-title">Восстановление доступа</div>
                 <div class="recovery-text">
                     Если вы забыли пароль, вы можете восстановить доступ к приложению с помощью кнопки "Восстановить" ниже.<br><br>
-                    <strong>Обратите внимание, что при восстановлении доступа к веб-приложению будут удалены все данные пользователя (в том числе заметки, фото, диаграммы и другие данные пользователя). Полный список удаляемых данных размещён на сайте поддержки.</strong>
+                    <strong>Обратите внимание, что при восстановлении доступа к веб-приложению будут удалены все данные пользователя (в том числе заметки, фото, диаграммы и другие данные пользователя).</strong>
+                </div>
+                <div class="recovery-actions">
+                    <button class="btn-recovery-danger" id="recoveryFirstBtn">Восстановить</button>
+                    <button class="btn-recovery-cancel" id="recoveryCancelBtn">Отмена</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ОКНО ОЖИДАНИЯ ПРИ ВОССТАНОВЛЕНИИ -->
+        <div class="waiting-overlay" id="waitingOverlay">
+            <div class="waiting-window">
+                <div class="waiting-icon">⏳</div>
+                <div class="waiting-title">Пожалуйста, подождите...</div>
+                <div class="waiting-spinner"></div>
+            </div>
+        </div>
+
+        <!-- ОКНО ПОДТВЕРЖДЕНИЯ ВОССТАНОВЛЕНИЯ -->
+        <div class="recovery-overlay" id="recoveryConfirmOverlay">
+            <div class="recovery-window">
+                <div class="recovery-icon">⚠️</div>
+                <div class="recovery-title">Подтверждение восстановления</div>
+                <div class="recovery-text">
+                    Вы уверены, что хотите восстановить доступ?<br><br>
+                    <strong>Это действие НЕОБРАТИМО удалит все старые данные приложения</strong> (заметки, фото, диаграммы и другие данные пользователя).
                 </div>
                 <div class="recovery-actions">
                     <button class="btn-recovery-danger" id="recoveryConfirmBtn">Восстановить</button>
-                    <button class="btn-recovery-cancel" id="recoveryCancelBtn">Отмена</button>
+                    <button class="btn-recovery-cancel" id="recoveryConfirmCancelBtn">Отмена</button>
                 </div>
             </div>
         </div>
@@ -2586,6 +2763,9 @@
                 <div class="support-text">
                     Вы можете подписаться на наш платный частный канал.<br><br>
                     <span class="highlight">Пока мы не выкладываем там новости или другой контент</span> — просто поддержите нас звёздами, чтобы мы могли развивать приложение дальше! 🚀
+                </div>
+                <div class="support-refund">
+                    ⚠️ Согласно <a href="https://telegram.org/privacy" target="_blank">политике конфиденциальности Telegram</a>, мы не возвращаем денежные средства за подписку на канал в случае случайного оформления или если вы передумали.
                 </div>
                 <div class="support-actions">
                     <button class="btn-support-donate" id="supportDonateBtn">⭐ Поддержать</button>
@@ -2753,7 +2933,6 @@
                 <button class="bg-btn" data-bg="blue"></button>
                 <button class="bg-btn" data-bg="green"></button>
                 <button class="bg-btn" data-bg="purple"></button>
-                <button class="bg-btn" data-bg="wallpaper"></button>
                 <button class="bg-btn custom-bg" data-bg="custom">+</button>
                 <input type="file" id="customBgInput" accept="image/*" style="display:none;">
             </div>
@@ -2764,9 +2943,10 @@
                 Пароль
             </div>
             <div class="password-section">
+                <input type="password" id="passwordInput" placeholder="Новый пароль">
                 <div class="password-row">
-                    <input type="password" id="passwordInput" placeholder="Новый пароль">
                     <button class="password-btn" id="passwordSetBtn">Установить</button>
+                    <button class="password-btn-delete" id="passwordDeleteBtn">Удалить</button>
                 </div>
                 <div class="password-status" id="passwordStatus">Пароль не установлен</div>
             </div>
@@ -2865,8 +3045,12 @@
 
             // Recovery
             const recoveryOverlay = document.getElementById('recoveryOverlay');
-            const recoveryConfirmBtn = document.getElementById('recoveryConfirmBtn');
+            const recoveryFirstBtn = document.getElementById('recoveryFirstBtn');
             const recoveryCancelBtn = document.getElementById('recoveryCancelBtn');
+            const waitingOverlay = document.getElementById('waitingOverlay');
+            const recoveryConfirmOverlay = document.getElementById('recoveryConfirmOverlay');
+            const recoveryConfirmBtn = document.getElementById('recoveryConfirmBtn');
+            const recoveryConfirmCancelBtn = document.getElementById('recoveryConfirmCancelBtn');
 
             // Transfer
             const transferOverlay = document.getElementById('transferOverlay');
@@ -2893,6 +3077,7 @@
             // Password
             const passwordInput = document.getElementById('passwordInput');
             const passwordSetBtn = document.getElementById('passwordSetBtn');
+            const passwordDeleteBtn = document.getElementById('passwordDeleteBtn');
             const passwordStatus = document.getElementById('passwordStatus');
 
             const viewModalOverlay = document.getElementById('viewModalOverlay');
@@ -3018,10 +3203,27 @@
             // ---------- ВОССТАНОВЛЕНИЕ ----------
             function showRecovery() {
                 recoveryOverlay.classList.add('active');
+                waitingOverlay.classList.remove('active');
+                recoveryConfirmOverlay.classList.remove('active');
             }
 
             function hideRecovery() {
                 recoveryOverlay.classList.remove('active');
+                waitingOverlay.classList.remove('active');
+                recoveryConfirmOverlay.classList.remove('active');
+            }
+
+            function showWaitingAndConfirm() {
+                // Скрываем первое окно
+                recoveryOverlay.classList.remove('active');
+                // Показываем загрузку
+                waitingOverlay.classList.add('active');
+
+                // Через 2.5 секунды показываем окно подтверждения
+                setTimeout(() => {
+                    waitingOverlay.classList.remove('active');
+                    recoveryConfirmOverlay.classList.add('active');
+                }, 2500);
             }
 
             function performRecovery() {
@@ -3141,7 +3343,7 @@
             }
 
             function openSupportChannel() {
-                window.open('https://t.me/+FE00yvzCU605M2Y6', '_blank');
+                window.open('https://t.me/+dWjXy1RvSnkyMmIy', '_blank');
                 hideSupport();
             }
 
@@ -3218,9 +3420,6 @@
                 } else if (currentBg === 'custom' && customBg) {
                     appBg.classList.add('image-bg');
                     appBg.style.backgroundImage = `url(${customBg})`;
-                } else if (currentBg === 'wallpaper') {
-                    appBg.classList.add('image-bg');
-                    appBg.style.backgroundImage = `url('https://s336vla.storage.yandex.net/rdisk/9f3afa99762b65812cfe291648695d8ea165cede8f3c967f4912856c7d0a4e3c/6aa0a6bc/r6qhP4JaNl-rfJM9Z_wyioP5tjDUFVMeIMLoD6mhLjGOEKeG9o4wNwCL_YAID7nzhAJS-6PHS3fEdxro0HxlIA==?uid=2346789452&filename=generated_image_e06ab1549d8b11f19fddea615d81a76c~2.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg&owner_uid=2346789452&fsize=187314&hid=0087fc85fd648a4be409dbcaba31b13b&media_type=image&tknv=v3&is_direct_zip_experiment=1&etag=9481030bfc206ff08b277cbd41729f20&ts=65b01d82a2700&s=6d2b982d81d420190be9b72d5efaebaee3a1625240f787d79b053d6367709998&pb=U2FsdGVkX1-jaujI0I34J1Xm96b1BNkMLH1ygs8hfa26zkAePdC-F8xJGIhUuYoGFll-75EoLkXhCUjkIyOK6eoEGiKVrSHpZM1nSo-dKwU')`;
                 } else {
                     const bgMap = { 'dark': '#1a1a2e', 'blue': '#0d1b2a', 'green': '#0f1a12', 'purple': '#1a0f1f' };
                     appBg.style.background = bgMap[currentBg] || (currentTheme === 'dark' ? '#0a0a0a' : '#f5f0eb');
@@ -4366,6 +4565,53 @@
                 passwordInput.value = '';
             });
 
+            passwordDeleteBtn.addEventListener('click', function() {
+                if (!password) {
+                    showToast('⚠️ Пароль не установлен');
+                    return;
+                }
+                // Показываем диалог для ввода текущего пароля
+                passwordDialog.classList.add('active');
+                dialogPasswordInput.value = '';
+                dialogError.textContent = '';
+                dialogPasswordInput.focus();
+                // Меняем заголовок и действие кнопки
+                document.querySelector('.dialog-title').textContent = '🔑 Введите текущий пароль';
+                dialogConfirmBtn.textContent = 'Удалить';
+                dialogConfirmBtn.style.background = '#e74c3c';
+                dialogConfirmBtn.style.color = '#fff';
+                // Сохраняем оригинальную функцию
+                const originalConfirm = dialogConfirmBtn.onclick;
+                dialogConfirmBtn.onclick = function() {
+                    const pwd = dialogPasswordInput.value;
+                    if (pwd === password) {
+                        dialogError.textContent = '';
+                        dialogPasswordInput.value = '';
+                        passwordDialog.classList.remove('active');
+                        removePassword();
+                        // Возвращаем кнопку в исходное состояние
+                        dialogConfirmBtn.textContent = 'Подтвердить';
+                        dialogConfirmBtn.style.background = '#ff8c00';
+                        dialogConfirmBtn.style.color = '#fff';
+                        document.querySelector('.dialog-title').textContent = '🔑 Введите пароль';
+                        dialogConfirmBtn.onclick = originalConfirm;
+                    } else {
+                        dialogError.textContent = '❌ Неверный пароль';
+                    }
+                };
+                dialogCancelBtn.onclick = function() {
+                    passwordDialog.classList.remove('active');
+                    dialogPasswordInput.value = '';
+                    dialogError.textContent = '';
+                    // Возвращаем кнопку в исходное состояние
+                    dialogConfirmBtn.textContent = 'Подтвердить';
+                    dialogConfirmBtn.style.background = '#ff8c00';
+                    dialogConfirmBtn.style.color = '#fff';
+                    document.querySelector('.dialog-title').textContent = '🔑 Введите пароль';
+                    dialogConfirmBtn.onclick = originalConfirm;
+                };
+            });
+
             passwordInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') passwordSetBtn.click();
             });
@@ -4385,8 +4631,10 @@
                 showRecovery();
             });
 
-            recoveryConfirmBtn.addEventListener('click', performRecovery);
+            recoveryFirstBtn.addEventListener('click', showWaitingAndConfirm);
             recoveryCancelBtn.addEventListener('click', hideRecovery);
+            recoveryConfirmBtn.addEventListener('click', performRecovery);
+            recoveryConfirmCancelBtn.addEventListener('click', hideRecovery);
 
             // Перенос данных
             transferRow.addEventListener('click', showTransfer);
@@ -4398,6 +4646,30 @@
                     dialogPasswordInput.value = '';
                     dialogError.textContent = '';
                     dialogPasswordInput.focus();
+                    // Убеждаемся что диалог настроен правильно
+                    document.querySelector('.dialog-title').textContent = '🔑 Введите пароль';
+                    dialogConfirmBtn.textContent = 'Подтвердить';
+                    dialogConfirmBtn.style.background = '#ff8c00';
+                    dialogConfirmBtn.style.color = '#fff';
+                    dialogConfirmBtn.onclick = function() {
+                        const pwd = dialogPasswordInput.value;
+                        if (pwd !== password) {
+                            dialogError.textContent = '❌ Неверный пароль';
+                            return;
+                        }
+                        dialogError.textContent = '';
+                        dialogPasswordInput.value = '';
+                        passwordDialog.classList.remove('active');
+                        exportDataNoPassword();
+                        // Возвращаем кнопку
+                        dialogConfirmBtn.onclick = null;
+                    };
+                    dialogCancelBtn.onclick = function() {
+                        passwordDialog.classList.remove('active');
+                        dialogPasswordInput.value = '';
+                        dialogError.textContent = '';
+                        dialogConfirmBtn.onclick = null;
+                    };
                 } else {
                     exportDataNoPassword();
                 }
@@ -4426,23 +4698,7 @@
                 hideTransfer();
             }
 
-            dialogConfirmBtn.addEventListener('click', function() {
-                if (password) {
-                    const pwd = dialogPasswordInput.value;
-                    if (pwd !== password) {
-                        dialogError.textContent = '❌ Неверный пароль';
-                        return;
-                    }
-                    dialogError.textContent = '';
-                    dialogPasswordInput.value = '';
-                    passwordDialog.classList.remove('active');
-                    exportDataNoPassword();
-                } else {
-                    passwordDialog.classList.remove('active');
-                    exportDataNoPassword();
-                }
-            });
-
+            // Универсальный обработчик для диалога с паролем
             dialogCancelBtn.addEventListener('click', function() {
                 passwordDialog.classList.remove('active');
                 dialogPasswordInput.value = '';
@@ -4450,7 +4706,10 @@
             });
 
             dialogPasswordInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') dialogConfirmBtn.click();
+                if (e.key === 'Enter') {
+                    const confirmBtn = document.querySelector('.dialog-btn-confirm');
+                    if (confirmBtn) confirmBtn.click();
+                }
             });
 
             transferUploadBtn.addEventListener('click', importData);
@@ -4461,6 +4720,15 @@
                     if (modalOverlay.classList.contains('active')) closeModal();
                     if (isViewOpen) closeViewModal();
                     if (recoveryOverlay.classList.contains('active')) hideRecovery();
+                    if (waitingOverlay.classList.contains('active')) {
+                        waitingOverlay.classList.remove('active');
+                        recoveryOverlay.classList.remove('active');
+                        recoveryConfirmOverlay.classList.remove('active');
+                    }
+                    if (recoveryConfirmOverlay.classList.contains('active')) {
+                        recoveryConfirmOverlay.classList.remove('active');
+                        recoveryOverlay.classList.remove('active');
+                    }
                     if (transferOverlay.classList.contains('active')) hideTransfer();
                     if (supportOverlay.classList.contains('active')) hideSupport();
                     if (passwordDialog.classList.contains('active')) {
